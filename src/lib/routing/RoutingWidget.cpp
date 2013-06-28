@@ -24,6 +24,8 @@
 #include "RoutingProfileSettingsDialog.h"
 #include "GeoDataDocument.h"
 #include "AlternativeRoutesModel.h"
+#include "RouteSyncManager.h"
+#include <CloudRoutesDialog.h>
 
 #include <QTime>
 #include <QTimer>
@@ -78,10 +80,14 @@ public:
 
     QToolButton *m_openRouteButton;
     QToolButton *m_saveRouteButton;
+    QToolButton *m_uploadToCloudButton;
+    QToolButton *m_openCloudRoutesButton;
     QToolButton *m_addViaButton;
     QToolButton *m_reverseRouteButton;
     QToolButton *m_clearRouteButton;
     QToolButton *m_configureButton;
+    
+    RouteSyncManager m_routeSyncManager;
 
     /** Constructor */
     RoutingWidgetPrivate(RoutingWidget *parent, MarbleWidget *marbleWidget );
@@ -121,6 +127,7 @@ RoutingWidgetPrivate::RoutingWidgetPrivate( RoutingWidget *parent, MarbleWidget 
         m_currentFrame( 0 ),
         m_iconSize( 16 ),
         m_collapse_width( 0 ),
+        m_routeSyncManager( m_routingManager, m_widget ),
         m_parent( parent )
 {
     createProgressAnimation();
@@ -184,6 +191,18 @@ void RoutingWidgetPrivate::setupToolBar()
     m_saveRouteButton->setToolTip( QObject::tr("Save Route") );
     m_saveRouteButton->setIcon( QIcon(":/icons/16x16/document-save.png") );
     m_toolBar->addWidget(m_saveRouteButton);
+    
+    m_toolBar->addSeparator();
+
+    m_uploadToCloudButton = new QToolButton;
+    m_uploadToCloudButton->setToolTip( QObject::tr("Upload to Cloud") );
+    m_uploadToCloudButton->setIcon( QIcon(":/icons/cloud-upload.png") );
+    m_toolBar->addWidget(m_uploadToCloudButton);
+
+    m_openCloudRoutesButton = new QToolButton;
+    m_openCloudRoutesButton->setToolTip( QObject::tr("Manage Cloud Routes") );
+    m_openCloudRoutesButton->setIcon( QIcon(":/icons/cloud-download.png") );
+    m_toolBar->addWidget(m_openCloudRoutesButton);
 
     m_toolBar->addSeparator();
 
@@ -213,6 +232,10 @@ void RoutingWidgetPrivate::setupToolBar()
                       m_parent, SLOT(openRoute()) );
     QObject::connect( m_saveRouteButton, SIGNAL(clicked()),
                       m_parent, SLOT(saveRoute()) );
+    QObject::connect( m_uploadToCloudButton, SIGNAL(clicked()),
+                      m_parent, SLOT(uploadToCloud()) );
+    QObject::connect( m_openCloudRoutesButton, SIGNAL(clicked()),
+                      m_parent, SLOT(openCloudRoutesDialog()));
     QObject::connect( m_addViaButton, SIGNAL(clicked()),
                       m_parent, SLOT(addInputWidget()) );
     QObject::connect( m_reverseRouteButton, SIGNAL(clicked()),
@@ -659,6 +682,16 @@ void RoutingWidget::saveRoute()
         d->m_routingManager->setLastSavePath( QFileInfo( fileName ).absolutePath() );
         d->m_routingManager->saveRoute( fileName );
     }
+}
+
+void RoutingWidget::uploadToCloud()
+{
+    d->m_routeSyncManager.uploadRoute();
+}
+
+void RoutingWidget::openCloudRoutesDialog()
+{
+    d->m_routeSyncManager.downloadRouteList();
 }
 
 void RoutingWidget::indicateRoutingFailure( GeoDataDocument* route )

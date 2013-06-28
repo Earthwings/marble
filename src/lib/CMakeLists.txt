@@ -232,6 +232,11 @@ set(marblewidget_SRCS
     SearchWidget.cpp
     kineticmodel.cpp
     NewstuffModel.cpp
+    
+    SyncManager.cpp
+    RouteSyncManager.cpp
+    CloudRouteModel.cpp
+    CloudRoutesDialog.cpp
 )
 
 set (marblewidget_UI
@@ -266,6 +271,7 @@ set (marblewidget_UI
     MapWizard.ui
     MapThemeDownloadDialog.ui
     WebPopupWidget.ui
+    CloudRoutesDialog.ui
 )
 
 # FIXME: cleaner approach of src/lib/MarbleControlBox.* vs. marble.qrc
