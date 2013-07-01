@@ -51,16 +51,6 @@ class RouteSyncManager : public SyncManager
         void downloadRouteList();
         
         /**
-         * Starts the download of specified route. After
-         * the download is complete, parseNetworkResponse()
-         * will forward the response to saveDownloadedToCache().
-         * @param routeId ID (timestamp) of the route that will be downloaded.
-         * @see RouteSyncManager::parseNetworkResponse()
-         * @see RouteSyncManager::saveDownloadedToCache()
-         */
-        void downloadRoute( QString routeId );
-        
-        /**
          * Saves the given KML to local cache.
          * @param kml The KML which will be saved to local cache.
          * @param filename KML's filename. It should be a timestamp.
@@ -80,6 +70,22 @@ class RouteSyncManager : public SyncManager
          * @param reply Reply of network request.
          */
         void parseNetworkResponse( QNetworkReply* reply );
+        
+        /**
+         * Starts the download of specified route. After
+         * the download is complete, parseNetworkResponse()
+         * will forward the response to saveDownloadedToCache().
+         * @param timestamp Timestamp of the route that will be downloaded.
+         * @see RouteSyncManager::parseNetworkResponse()
+         * @see RouteSyncManager::saveDownloadedToCache()
+         */
+        void downloadRoute( QString timestamp );
+        
+        /**
+         * Opens route.
+         * @param timestamp Timestamp of the route that will be opened.
+         */
+        void openRoute( QString timestamp );
 
     private:
         class Private;

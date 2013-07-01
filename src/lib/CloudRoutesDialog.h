@@ -12,8 +12,11 @@
 #define CLOUDROUTESDIALOG_H
 
 #include "MarbleWidget.h"
+#include "CloudRouteModel.h"
 
 #include <QDialog>
+#include <QListView>
+#include <QStyledItemDelegate>
 
 namespace Marble {
 
@@ -24,9 +27,46 @@ class CloudRoutesDialog : public QDialog
     public:
         explicit CloudRoutesDialog( QString json, Marble::MarbleWidget* marbleWidget );
         
+    signals:
+        void downloadButtonClicked( QString timestamp );
+        void openButtonClicked( QString timestamp );
+        
     private:
         class Private;
         Private *d;
+};
+
+class RouteItemDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+    
+    public:
+        explicit RouteItemDelegate( QListView *view, CloudRouteModel *model, MarbleWidget *marbleWidget );
+        void paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const;
+        QSize sizeHint( const QStyleOptionViewItem& option, const QModelIndex& index ) const;
+        bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
+        
+    signals:
+        void downloadButtonClicked( QString timestamp );
+        void openButtonClicked( QString timestamp );
+        
+    private:
+        enum Element {
+            Text,
+            OpenButton,
+            DownloadButton,
+            RemoveFromCacheButton,
+            RemoveFromCloudButton
+        };
+        
+        int buttonWidth( const QStyleOptionViewItem &option ) const;
+        QStyleOptionButton button( Element element, const QStyleOptionViewItem &option ) const;
+        QString text( const QModelIndex &index ) const;
+        QRect position( Element element, const QStyleOptionViewItem &option ) const;
+        
+        QListView *m_view;
+        CloudRouteModel *m_model;
+        mutable int m_buttonWidth;
+        int const m_iconSize;
 };
 
 }

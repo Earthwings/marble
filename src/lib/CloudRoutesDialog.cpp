@@ -11,46 +11,13 @@
 #include "CloudRoutesDialog.h"
 #include "ui_CloudRoutesDialog.h"
 
-#include "CloudRouteModel.h"
-
 #include <QDebug>
 #include <QPainter>
-#include <QListView>
 #include <QApplication>
 #include <QTextDocument>
-#include <QStyledItemDelegate>
 #include <QAbstractTextDocumentLayout>
 
 namespace Marble {
-
-class RouteItemDelegate : public QStyledItemDelegate {    
-    public:
-        explicit RouteItemDelegate( QListView *view, CloudRouteModel *model, MarbleWidget *marbleWidget );
-        void paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const;
-        QSize sizeHint( const QStyleOptionViewItem& option, const QModelIndex& index ) const;
-        bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
-        
-    signals:
-    
-    private:
-        enum Element {
-            Text,
-            OpenButton,
-            DownloadButton,
-            RemoveFromCacheButton,
-            RemoveFromCloudButton
-        };
-        
-        int buttonWidth( const QStyleOptionViewItem &option ) const;
-        QStyleOptionButton button( Element element, const QStyleOptionViewItem &option ) const;
-        QString text( const QModelIndex &index ) const;
-        QRect position( Element element, const QStyleOptionViewItem &option ) const;
-        
-        QListView *m_view;
-        CloudRouteModel *m_model;
-        mutable int m_buttonWidth;
-        int const m_iconSize;
-};
 
 RouteItemDelegate::RouteItemDelegate( QListView *view, CloudRouteModel *model, MarbleWidget *marbleWidget ) :
     m_view( view ),
@@ -123,27 +90,37 @@ QSize RouteItemDelegate::sizeHint( const QStyleOptionViewItem& option, const QMo
 
 bool RouteItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
 {
-    QMouseEvent *mouseEvent = static_cast<QMouseEvent*>( event );
-    CloudRouteModel *routeModel = static_cast<CloudRouteModel*>( model );
-    
-    bool cached = index.data( CloudRouteModel::IsCached ).toBool();
-   
-    if ( cached ) {
-        QRect openRect = position( OpenButton, option );
-        QRect cacheRemoveRect = position( RemoveFromCacheButton, option );
+    if ( ( event->type() == QEvent::MouseButtonRelease ) ) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>( event );
+        CloudRouteModel *routeModel = static_cast<CloudRouteModel*>( model );
+        QPoint pos = mouseEvent->pos();
         
-        if ( openRect.contains( mouseEvent->pos() ) ) {
-            // TODO Open route
-            qDebug() << "Open";
-        } else if ( cacheRemoveRect.contains( mouseEvent->pos() ) ) {
-            m_model->removeFromCache( index );
+        bool cached = index.data( CloudRouteModel::IsCached ).toBool();
+    
+        if ( cached ) {
+            QRect openRect = position( OpenButton, option );
+            QRect cacheRemoveRect = position( RemoveFromCacheButton, option );
+            
+            if ( openRect.contains( pos ) ) {
+                QString timestamp = index.data( CloudRouteModel::Timestamp ).toString();
+                emit openButtonClicked( timestamp );
+                return true;
+            } else if ( cacheRemoveRect.contains( pos ) ) {
+                m_model->removeFromCache( index );
+                return true;
+            }
+        } else {
+            QRect downloadRect = position( DownloadButton, option );
+            QRect cloudRemoveRect = position( RemoveFromCloudButton, option );
+            if ( downloadRect.contains( pos ) ) {
+                QString timestamp = index.data( CloudRouteModel::Timestamp ).toString();
+                emit downloadButtonClicked( timestamp );
+                return true;
+            }
         }
-    } else {
-        QRect downloadRect = position( DownloadButton, option );
-        QRect cloudRemoveRect = position( RemoveFromCloudButton, option );
     }
     
-    return QStyledItemDelegate::editorEvent(event, model, option, index);
+    return false;
 }
 
 int RouteItemDelegate::buttonWidth( const QStyleOptionViewItem &option ) const
@@ -199,7 +176,7 @@ QStyleOptionButton RouteItemDelegate::button( Element element, const QStyleOptio
 
 QString RouteItemDelegate::text( const QModelIndex& index ) const
 {
-    return QString( "%0<br /><b>Distance:</b> %1<br/><b>Duration:</b> %2" )
+    return QString( "%0<br /><b>Duration:</b> %1<br/><b>Distance:</b> %2" )
             .arg( index.data( CloudRouteModel::Name ).toString() )
             .arg( index.data( CloudRouteModel::Duration ).toString() )
             .arg( index.data( CloudRouteModel::Distance ).toString() );
@@ -252,8 +229,13 @@ CloudRoutesDialog::CloudRoutesDialog( QString json, Marble::MarbleWidget* marble
     d( new Private )
 {
     d->setupUi( this );
+    
+    RouteItemDelegate *delegate = new RouteItemDelegate( d->listView, d->m_model, marbleWidget );
+    connect( delegate, SIGNAL(downloadButtonClicked(QString)), this, SIGNAL(downloadButtonClicked(QString)) );
+    connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
+    
     d->m_model->parseRouteList( json );
-    d->listView->setItemDelegate( new RouteItemDelegate( d->listView, d->m_model, marbleWidget ) );
+    d->listView->setItemDelegate( delegate );
     d->listView->setModel( d->m_model );
 }
 

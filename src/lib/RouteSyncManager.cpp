@@ -77,14 +77,12 @@ class RouteSyncManager::Private {
         Api m_apiRoutes;
         QString m_cacheDir;
         MarbleWidget *m_marbleWidget;
-        CloudRouteModel *m_routeModel;
         RoutingManager *m_routingManager;
         QNetworkAccessManager *m_network;
 };
 
 RouteSyncManager::Private::Private( RoutingManager* routingManager, MarbleWidget *marbleWidget ) :
     m_marbleWidget( marbleWidget ),
-    m_routeModel( new CloudRouteModel() ),
     m_routingManager( routingManager ),
     m_network( new QNetworkAccessManager() )
 {
@@ -114,7 +112,6 @@ QString RouteSyncManager::saveDisplayedToCache() const
     d->m_routingManager->saveRoute( temporaryFile.fileName() );
     QByteArray tempKml = temporaryFile.readAll();
     
-    // const QString hash = generateHash( tempKml );
     const QString stamp = generateTimestamp();
     QDir cacheDir = QDir( d->m_cacheDir );
     if( !cacheDir.exists() ) { 
@@ -123,10 +120,9 @@ QString RouteSyncManager::saveDisplayedToCache() const
     const QString filename = cacheDir.absolutePath() + "/" + stamp + ".kml";
     
     // Move the temporary file to local cache, with its
-    // filename as KML's SHA1 summary.
+    // filename as timestamp.
     // TODO: temporaryFile.rename( filename );
     d->m_routingManager->saveRoute( filename );
-    
     return filename;
 }
 
@@ -182,6 +178,7 @@ void RouteSyncManager::downloadRouteList()
     d->m_network->get( request );
 }
 
+
 void RouteSyncManager::saveDownloadedToCache( QString kml, QString filename ) const
 {
     QFile file( d->m_cacheDir + filename + ".kml" );
@@ -192,8 +189,11 @@ void RouteSyncManager::saveDownloadedToCache( QString kml, QString filename ) co
 
 void RouteSyncManager::openCloudRoutesDialog( QString routeJson, MarbleWidget* marbleWidget )
 {
-    CloudRoutesDialog dialog( routeJson, marbleWidget );
-    dialog.exec();
+    CloudRoutesDialog *dialog = new CloudRoutesDialog( routeJson, marbleWidget );
+    connect( dialog, SIGNAL(downloadButtonClicked(QString)), this, SLOT(downloadRoute(QString)) );
+    connect( dialog, SIGNAL(openButtonClicked(QString)), this, SLOT(openRoute(QString)) );
+    
+    dialog->exec();
 }
 
 void RouteSyncManager::parseNetworkResponse( QNetworkReply *reply )
@@ -205,8 +205,23 @@ void RouteSyncManager::parseNetworkResponse( QNetworkReply *reply )
     } else if ( path == d->m_apiRoutes.list ) {
         openCloudRoutesDialog( reply->readAll(), d->m_marbleWidget );
     } else if ( path == d->m_apiRoutes.download ) {
-        
+        QString filename = reply->url().queryItemValue( "timestamp" );
+        saveDownloadedToCache( reply->readAll(), filename );
     }
+}
+
+void RouteSyncManager::downloadRoute( QString timestamp )
+{
+    QUrl url( "http://localhost" +  d->m_apiRoutes.download );
+    url.addQueryItem( "timestamp", timestamp );
+    
+    QNetworkRequest request( url );
+    d->m_network->get( request );
+}
+
+void RouteSyncManager::openRoute( QString timestamp )
+{
+    d->m_routingManager->loadRoute( d->m_cacheDir + timestamp + ".kml" );
 }
 
 }
