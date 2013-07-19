@@ -24,17 +24,21 @@ AbstractSyncBackend::Private::Private( QUrl apiUrl ) : m_apiUrl( apiUrl )
 {
 }
 
-AbstractSyncBackend::AbstractSyncBackend( QUrl apiUrl ) : QObject(), d( new Private( apiUrl ) )
+AbstractSyncBackend::AbstractSyncBackend( const QUrl &apiUrl, QObject *parent ) : QObject(), d( new Private( apiUrl ) )
 {
 }
 
-QUrl AbstractSyncBackend::endpointUrl( QString endpoint )
+AbstractSyncBackend::~AbstractSyncBackend()
+{
+}
+
+QUrl AbstractSyncBackend::endpointUrl( const QString &endpoint )
 {
     QString endpointUrl = QString( "%0/%1" ).arg( d->m_apiUrl.toString() ).arg( endpoint );
     return QUrl( endpointUrl );
 }
 
-QUrl AbstractSyncBackend::endpointUrl(QString endpoint, QString parameter)
+QUrl AbstractSyncBackend::endpointUrl( const QString &endpoint, QString &parameter )
 {
     QString endpointUrl = QString( "%0/%1/%2" ).arg( d->m_apiUrl.toString() ).arg( endpoint ).arg( parameter );
     return QUrl( endpointUrl );

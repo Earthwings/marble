@@ -20,7 +20,7 @@ INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}/geodata/parser
  ${CMAKE_CURRENT_SOURCE_DIR}/graphicsview
  ${CMAKE_CURRENT_SOURCE_DIR}/layers
- ${CMAKE_CURRENT_SOURCE_DIR}/sync
+ ${CMAKE_CURRENT_SOURCE_DIR}/cloudsync
  ${QT_INCLUDE_DIR}
 )
 INCLUDE(${QT_USE_FILE})
@@ -234,12 +234,12 @@ set(marblewidget_SRCS
     kineticmodel.cpp
     NewstuffModel.cpp
     
-    sync/SyncManager.cpp
-    sync/RouteSyncManager.cpp
-    sync/AbstractSyncBackend.cpp
-    sync/OwncloudSyncBackend.cpp
-    sync/CloudRouteModel.cpp
-    sync/CloudRoutesDialog.cpp
+    cloudsync/SyncManager.cpp
+    cloudsync/RouteSyncManager.cpp
+    cloudsync/AbstractSyncBackend.cpp
+    cloudsync/OwncloudSyncBackend.cpp
+    cloudsync/CloudRouteModel.cpp
+    cloudsync/CloudRoutesDialog.cpp
 )
 
 set (marblewidget_UI
@@ -274,7 +274,7 @@ set (marblewidget_UI
     MapWizard.ui
     MapThemeDownloadDialog.ui
     WebPopupWidget.ui
-    sync/CloudRoutesDialog.ui
+    cloudsync/CloudRoutesDialog.ui
     MarbleSyncSettingsWidget.ui
 )
 
@@ -458,12 +458,12 @@ else (APPLE AND QTONLY)
     routing/RoutingModel.h
     routing/RoutingProfile.h
     
-    sync/SyncManager.h
-    sync/RouteSyncManager.h
-    sync/AbstractSyncBackend.h
-    sync/OwncloudSyncBackend.h
-    sync/CloudRouteModel.h
-    sync/CloudRoutesDialog.h
+    cloudsync/SyncManager.h
+    cloudsync/RouteSyncManager.h
+    cloudsync/AbstractSyncBackend.h
+    cloudsync/OwncloudSyncBackend.h
+    cloudsync/CloudRouteModel.h
+    cloudsync/CloudRoutesDialog.h
 
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include/marble
 )

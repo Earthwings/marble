@@ -58,6 +58,10 @@ OwncloudSyncBackend::OwncloudSyncBackend( QUrl apiUrl ) :
 {
 }
 
+OwncloudSyncBackend::~OwncloudSyncBackend()
+{
+}
+
 void OwncloudSyncBackend::uploadRoute( QByteArray encodedQuery )
 {
     QNetworkRequest request( endpointUrl( d->m_routeUploadEndpoint ) );

@@ -28,7 +28,7 @@
 #include "MarbleGlobal.h"             // types needed in all of marble.
 #include "marble_export.h"
 #include "GeoDataFolder.h"
-#include "sync/SyncManager.h"
+#include "cloudsync/SyncManager.h"
 // Qt
 class QAbstractItemModel;
 class QItemSelectionModel;

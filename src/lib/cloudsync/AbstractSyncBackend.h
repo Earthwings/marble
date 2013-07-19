@@ -15,21 +15,20 @@
 
 namespace Marble {
 
-class Private;
-    
 class AbstractSyncBackend : public QObject
 {
     Q_OBJECT
     
-    public:
-        explicit AbstractSyncBackend( QUrl apiUrl );
-        
-        QUrl endpointUrl( QString endpoint );
-        QUrl endpointUrl( QString endpoint, QString parameter);
-        
-    private:
-        class Private;
-        Private *d;
+public:
+    explicit AbstractSyncBackend( const QUrl &apiUrl, QObject *parent = 0 );
+    ~AbstractSyncBackend();
+
+    QUrl endpointUrl( const QString &endpoint );
+    QUrl endpointUrl( const QString &endpoint, QString &parameter );
+
+private:
+    class Private;
+    Private *d;
 };
 
 }

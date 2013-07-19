@@ -20,7 +20,7 @@
 #include <kmenu.h>
 #include <kurl.h>
 #include "MarbleGlobal.h"
-#include "sync/SyncManager.h"
+#include "cloudsync/SyncManager.h"
 #include <krecentfilesaction.h>
 
 class KAboutData;
