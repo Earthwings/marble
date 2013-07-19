@@ -171,7 +171,7 @@ void RouteSyncManager::uploadRoute()
         
         syncBackend->uploadRoute( encodedQuery );
         connect( syncBackend, SIGNAL(routeUploadProgress(qint64,qint64)), this, SLOT(updateUploadProgressbar(qint64,qint64)) );
-        connect( d->m_uploadProgressDialog, SIGNAL(canceled()), syncBackend, SLOT(cancelUpload()) );
+        //connect( d->m_uploadProgressDialog, SIGNAL(canceled()), syncBackend, SLOT(cancelUpload()) );
         d->m_uploadProgressDialog->exec();
     }
 }
@@ -200,8 +200,6 @@ void RouteSyncManager::downloadRoute( QString timestamp )
         OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( apiUrl() );
         connect( syncBackend, SIGNAL(routeDownloadProgress(qint64,qint64)),
                  d->m_dialog->model(), SLOT(updateProgress(qint64,qint64)) );
-        connect( syncBackend, SIGNAL(routeDownloaded(QString,QString)),
-                 this, SLOT(saveDownloadedToCache(QString,QString)) );
         syncBackend->downloadRoute( timestamp );
     }
 }
