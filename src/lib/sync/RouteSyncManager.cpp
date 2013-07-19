@@ -224,7 +224,7 @@ void RouteSyncManager::updateUploadProgressbar( qint64 sent, qint64 total )
     d->m_uploadProgressDialog->setValue( percentage );
     
     if( sent == total ) {
-        d->m_uploadProgressDialog->close();
+        d->m_uploadProgressDialog->accept();
         disconnect( this, SLOT(updateUploadProgressbar(qint64,qint64)) );
     }
 }
@@ -235,7 +235,7 @@ void RouteSyncManager::updateListDownloadProgressbar(qint64 received, qint64 tot
     d->m_listDownloadProgressDialog->setValue( percentage );
     
     if( received == total ) {
-        d->m_listDownloadProgressDialog->close();
+        d->m_listDownloadProgressDialog->accept();
         disconnect( this, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
     }
 }

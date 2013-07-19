@@ -275,6 +275,7 @@ set (marblewidget_UI
     MapThemeDownloadDialog.ui
     WebPopupWidget.ui
     sync/CloudRoutesDialog.ui
+    MarbleSyncSettingsWidget.ui
 )
 
 # FIXME: cleaner approach of src/lib/MarbleControlBox.* vs. marble.qrc

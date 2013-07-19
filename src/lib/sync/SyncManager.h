@@ -10,6 +10,7 @@
 
 #ifndef SYNCMANAGER_H
 #define SYNCMANAGER_H
+
 #include <QObject>
 #include <QUrl>
 
@@ -19,17 +20,25 @@ class SyncManager : public QObject
 {
     Q_OBJECT
     
-    public:        
-        enum Backend {
-            Owncloud
-        };
-        
-        Backend backend();
-        QString server();
-        QString username();
-        QString password();
-        QString apiPath();
-        QUrl apiUrl();
+public:
+    SyncManager( QObject *parent = 0 );
+
+    enum Backend {
+        Owncloud
+    };
+
+    Backend backend();
+    QString server();
+    QString username();
+    QString password();
+    QString apiPath();
+    QUrl apiUrl();
+
+public slots:
+    void receiveCloudSettings( QString server, QString username, QString password );
+
+signals:
+    void cloudSettingsRequested();
 };
 
 }

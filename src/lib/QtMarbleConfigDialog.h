@@ -93,6 +93,14 @@ class MARBLE_EXPORT QtMarbleConfigDialog : public QDialog
     int chosenTimezone() const;
     
     void initializeCustomTimezone();
+    
+    // Sync settings
+    bool syncEnabled() const;
+    bool bookmarkSyncEnabled() const;
+    bool routeSyncEnabled() const;
+    QString syncServer() const;
+    QString syncUsername() const;
+    QString syncPassword() const;
 
     Q_SIGNALS:
     /**

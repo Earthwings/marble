@@ -9,8 +9,15 @@
 //
 
 #include "SyncManager.h"
+#include <QDebug>
+
 namespace Marble
 {
+
+SyncManager::SyncManager( QObject *parent ) : QObject( parent )
+{
+    emit cloudSettingsRequested();
+}
 
 SyncManager::Backend SyncManager::backend()
 {
@@ -42,6 +49,13 @@ QUrl SyncManager::apiUrl()
     return QUrl( QString( "http://%0:%1@%2/%3" )
                 .arg( username() ).arg( password() )
                 .arg( server() ).arg( apiPath() ) );
+}
+
+void SyncManager::receiveCloudSettings( QString server, QString username, QString password )
+{
+    qDebug() << server;
+    qDebug() << username;
+    qDebug() << password;
 }
 
 }

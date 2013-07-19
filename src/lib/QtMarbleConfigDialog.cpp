@@ -16,6 +16,7 @@
 #include "ui_MarbleViewSettingsWidget.h"
 #include "ui_MarbleNavigationSettingsWidget.h"
 #include "ui_MarbleTimeSettingsWidget.h"
+#include "ui_MarbleSyncSettingsWidget.h"
 
 // Qt
 #include <QList>
@@ -64,6 +65,7 @@ class QtMarbleConfigDialogPrivate
     Ui::MarbleNavigationSettingsWidget ui_navigationSettings;
     Ui::MarbleTimeSettingsWidget       ui_timeSettings;
     Ui::MarbleCacheSettingsWidget      ui_cacheSettings;
+    Ui::MarbleSyncSettingsWidget       ui_syncSettings;
     MarblePluginSettingsWidget         *w_pluginSettings;
 
     QSettings m_settings;
@@ -158,6 +160,10 @@ QtMarbleConfigDialog::QtMarbleConfigDialog( MarbleWidget *marbleWidget, QWidget 
 
     connect( this, SIGNAL(rejected()), &d->m_pluginModel, SLOT(retrievePluginState()) );
     connect( this, SIGNAL(accepted()), &d->m_pluginModel, SLOT(applyPluginState()) );
+    
+    QWidget *w_syncSettings = new QWidget( this );
+    d->ui_syncSettings.setupUi( w_syncSettings );
+    tabWidget->addTab( w_syncSettings, tr( "Synchronization" ) );
 
     // Layout
     QVBoxLayout *layout = new QVBoxLayout( this );
@@ -276,6 +282,14 @@ void QtMarbleConfigDialog::readSettings()
 
     // Routing
 
+    // ownCloud
+    d->ui_syncSettings.kcfg_enableSync->setChecked( syncEnabled() );
+    d->ui_syncSettings.kcfg_syncBookmarks->setChecked( bookmarkSyncEnabled() );
+    d->ui_syncSettings.kcfg_syncRoutes->setChecked( routeSyncEnabled() );
+    d->ui_syncSettings.kcfg_syncServer->setText( syncServer() );
+    d->ui_syncSettings.kcfg_syncUsername->setText( syncUsername() );
+    d->ui_syncSettings.kcfg_syncPassword->setText( syncPassword() );
+    
     // Read the settings of the plugins
     d->m_marbleWidget->readPluginSettings( d->m_settings );
 
@@ -351,6 +365,15 @@ void QtMarbleConfigDialog::writeSettings()
     d->m_settings.setValue( "systemTime", d->ui_timeSettings.kcfg_systemTime->isChecked() );
     d->m_settings.setValue( "lastSessionTime", d->ui_timeSettings.kcfg_lastSessionTime->isChecked() );
     d->m_settings.setValue( "chosenTimezone", d->ui_timeSettings.kcfg_chosenTimezone->currentIndex() );
+    d->m_settings.endGroup();
+    
+    d->m_settings.beginGroup( "Sync" );
+    d->m_settings.setValue( "enableSync", d->ui_syncSettings.kcfg_enableSync->isChecked() );
+    d->m_settings.setValue( "syncBookmarks", d->ui_syncSettings.kcfg_syncBookmarks->isChecked() );
+    d->m_settings.setValue( "syncRoutes", d->ui_syncSettings.kcfg_syncRoutes->isChecked() );
+    d->m_settings.setValue( "syncServer", d->ui_syncSettings.kcfg_syncServer->text() );
+    d->m_settings.setValue( "syncUsername", d->ui_syncSettings.kcfg_syncUsername->text() );
+    d->m_settings.setValue( "syncPassword", d->ui_syncSettings.kcfg_syncPassword->text() );
     d->m_settings.endGroup();
 
     // Plugins
@@ -544,6 +567,35 @@ void QtMarbleConfigDialog::initializeCustomTimezone()
     }
 }
 
+bool QtMarbleConfigDialog::syncEnabled() const
+{
+    return d->m_settings.value( "Sync/enableSync", "" ).toBool();
+}
+
+bool QtMarbleConfigDialog::bookmarkSyncEnabled() const
+{
+    return d->m_settings.value( "Sync/syncBookmarks", "" ).toBool();
+}
+
+bool QtMarbleConfigDialog::routeSyncEnabled() const
+{
+    return d->m_settings.value( "Sync/syncRoutes", "" ).toBool();
+}
+
+QString QtMarbleConfigDialog::syncServer() const
+{
+    return d->m_settings.value( "Sync/syncServer", "" ).toString();
+}
+
+QString QtMarbleConfigDialog::syncUsername() const
+{
+    return d->m_settings.value( "Sync/syncUsername", "" ).toString();
+}
+
+QString QtMarbleConfigDialog::syncPassword() const
+{
+    return d->m_settings.value( "Sync/syncPassword", "" ).toString();
+}
 
 }
 
