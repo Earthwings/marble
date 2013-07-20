@@ -20,15 +20,10 @@
 
 namespace Marble {
 
-bool RouteItem::operator==( const RouteItem& other ) const
-{
-    return this->m_timestamp == other.m_timestamp;
-}
-
 class CloudRouteModel::Private {
     public:
         explicit Private();
-        
+
         QVector<RouteItem> m_items;
         QString m_cacheDir;
         QModelIndex m_currentlyDownloading;
@@ -52,14 +47,14 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
 {
     if ( index.isValid() && index.row() >= 0 && index.row() < d->m_items.size() ) {
         switch( role ) {
-            case Timestamp: return d->m_items.at( index.row() ).m_timestamp;
-            case Name: return d->m_items.at( index.row() ).m_name;
-            case Distance: return d->m_items.at( index.row() ).m_distance;
-            case Duration: return d->m_items.at( index.row() ).m_duration;
-            case IsCached: return isCached( index );
-            case IsDownloading: return isDownloading( index );
-            case TotalSize: return d->m_totalDownloadSize;
-            case DownloadedSize: return d->m_downloadedSize;
+        case Timestamp: return d->m_items.at( index.row() ).timestamp();
+        case Name: return d->m_items.at( index.row() ).name();
+        case Distance: return d->m_items.at( index.row() ).distance();
+        case Duration: return d->m_items.at( index.row() ).duration();
+        case IsCached: return isCached( index );
+        case IsDownloading: return isDownloading( index );
+        case TotalSize: return d->m_totalDownloadSize;
+        case DownloadedSize: return d->m_downloadedSize;
         }
     }
     

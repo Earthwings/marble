@@ -114,11 +114,10 @@ void OwncloudSyncBackend::prepareRouteList()
             iterator.next();
             
             RouteItem route;
-            route.m_timestamp = iterator.value().property( "timestamp" ).toString();
-            route.m_name = iterator.value().property( "name" ).toString();
-            route.m_distance = iterator.value().property( "distance" ).toString();
-            route.m_duration = iterator.value().property( "duration" ).toString();
-            route.m_isDownloading = false;
+            route.setTimestamp( iterator.value().property( "timestamp" ).toString() );
+            route.setName ( iterator.value().property( "name" ).toString() );
+            route.setDistance( iterator.value().property( "distance" ).toString() );
+            route.setDuration( iterator.value().property( "duration" ).toString() );
             
             vector.append( route );
         }

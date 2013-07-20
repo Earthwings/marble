@@ -11,21 +11,13 @@
 #ifndef CLOUDROUTEMODEL_H
 #define CLOUDROUTEMODEL_H
 
+#include "RouteItem.h"
+
 #include <QModelIndex>
+#include <QAbstractListModel>
 
 namespace Marble
 {
-
-class RouteItem {
-    public:
-        bool operator==( const RouteItem &other ) const;
-
-        QString m_timestamp;
-        QString m_name;
-        QString m_distance;
-        QString m_duration;
-        bool m_isDownloading;
-};
 
 class CloudRouteModel : public QAbstractListModel
 {
