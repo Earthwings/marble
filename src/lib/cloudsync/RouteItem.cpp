@@ -1,3 +1,13 @@
+//
+// This file is part of the Marble Virtual Globe.
+//
+// This program is free software licensed under the GNU LGPL. You can
+// find a copy of this license in LICENSE.txt in the top directory of
+// the source code.
+//
+// Copyright 2013   Utku Aydın <utkuaydin34@gmail.com>
+//
+
 #include "RouteItem.h"
 
 namespace Marble {
@@ -9,7 +19,6 @@ public:
     QString m_name;
     QString m_distance;
     QString m_duration;
-    bool m_isDownloading;
 };
 
 RouteItem::RouteItem() : d( new Private )

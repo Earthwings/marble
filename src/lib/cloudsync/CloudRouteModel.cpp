@@ -10,6 +10,7 @@
 
 #include "CloudRouteModel.h"
 
+#include "MarbleDebug.h"
 #include "MarbleDirs.h"
 
 #include <QDebug>
@@ -21,21 +22,22 @@
 namespace Marble {
 
 class CloudRouteModel::Private {
-    public:
-        explicit Private();
 
-        QVector<RouteItem> m_items;
-        QString m_cacheDir;
-        QModelIndex m_currentlyDownloading;
-        qint64 m_totalDownloadSize;
-        qint64 m_downloadedSize;
+public:
+    Private();
+
+    QVector<RouteItem> m_items;
+    QString m_cacheDir;
+    QModelIndex m_currentlyDownloading;
+    qint64 m_totalDownloadSize;
+    qint64 m_downloadedSize;
 };
 
 CloudRouteModel::Private::Private() :
     m_totalDownloadSize( -1 ),
     m_downloadedSize( 0 )
 {
-    m_cacheDir = MarbleDirs::localPath() + "/sync/cache/routes/";
+    m_cacheDir = MarbleDirs::localPath() + "/cloudsync/cache/routes/";
 }
 
 CloudRouteModel::CloudRouteModel( QObject* parent ) :
@@ -61,28 +63,34 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
     return QVariant();
 }
 
-int CloudRouteModel::rowCount( const QModelIndex& parent ) const
+int CloudRouteModel::rowCount( const QModelIndex &parent ) const
 {
+    Q_UNUSED( parent )
     return d->m_items.count();
 }
 
-void CloudRouteModel::setItems( QVector<RouteItem> items )
+void CloudRouteModel::setItems( const QVector<RouteItem> &items )
 {
     d->m_items = items;
+    reset();
 }
 
-bool CloudRouteModel::isCached( const QModelIndex& index ) const
+bool CloudRouteModel::isCached( const QModelIndex &index ) const
 {
-    QDir cacheDir( d->m_cacheDir );
-    return cacheDir.exists( index.data( Timestamp ).toString() + ".kml" );
+    QFileInfo cacheDir( d->m_cacheDir + index.data( Timestamp ).toString() + ".kml"  );
+    return cacheDir.exists();
 }
 
 void CloudRouteModel::removeFromCache( const QModelIndex index )
 {
     QString timestamp = index.data( Timestamp ).toString();
     QString filename = timestamp + ".kml";
-    QFile file( QDir( d->m_cacheDir ).entryInfoList( QStringList() << filename ).at( 0 ).absoluteFilePath() );
-    file.remove();
+    QFile file( d->m_cacheDir + filename );
+    bool fileRemoved = file.remove();
+    if ( !fileRemoved ) {
+        mDebug() << "Failed to remove locally cached route file " << filename <<
+                    ". It might have been removed already, or its directory is missing / not writable.";
+    }
 }
 
 void CloudRouteModel::setCurrentlyDownloading( const QModelIndex index )

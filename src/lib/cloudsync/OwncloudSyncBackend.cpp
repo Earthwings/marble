@@ -11,12 +11,13 @@
 #include "OwncloudSyncBackend.h"
 #include "CloudRouteModel.h"
 #include "MarbleDirs.h"
+#include "MarbleDebug.h"
 
 #include <QNetworkAccessManager>
+#include <QScriptValueIterator>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QScriptEngine>
-#include <QScriptValueIterator>
 #include <QFileInfo>
 #include <QDebug>
 #include <QDir>
@@ -42,8 +43,11 @@ class OwncloudSyncBackend::Private {
 };
 
 OwncloudSyncBackend::Private::Private() :
-    m_cacheDir( new QDir( MarbleDirs::localPath() + "/sync/cache/routes/" ) ),
+    m_cacheDir( new QDir( MarbleDirs::localPath() + "/cloudsync/cache/routes/" ) ),
     m_network( new QNetworkAccessManager() ),
+    m_routeUploadReply(),
+    m_routeListReply(),
+    m_routeDownloadReply(),
     // Route API endpoints
     m_routeUploadEndpoint( "routes/create" ),
     m_routeListEndpoint( "routes" ),
@@ -137,11 +141,20 @@ void OwncloudSyncBackend::saveDownloadedRoute()
     QScriptValue response = engine.evaluate( QString( "(%0)" ).arg( result ) );
     QScriptValue kml = response.property( "data" );
     
-    d->m_cacheDir->mkpath( d->m_cacheDir->absolutePath() );
+    bool pathCreated = d->m_cacheDir->mkpath( d->m_cacheDir->absolutePath() );
+    if ( !pathCreated ) {
+        mDebug() << "Couldn't create the path " << d->m_cacheDir->absolutePath() <<
+                    ". Check if your user has sufficent permissions for this operation.";
+    }
     
     QFile file( d->m_cacheDir->absolutePath() + QString( "/%0.kml").arg( timestamp ) );
     
-    file.open( QFile::ReadWrite );
+    bool fileOpened = file.open( QFile::ReadWrite );
+    if ( !fileOpened ) {
+        mDebug() << "Failed to open file" << d->m_cacheDir->absolutePath() + QString( "/%0.kml").arg( timestamp )
+                 <<  " for writing. Its directory either is missing or is not writable.";
+    }
+
     file.write( kml.toString().toUtf8() );
     file.close();
 }

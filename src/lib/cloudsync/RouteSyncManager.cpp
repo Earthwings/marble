@@ -38,12 +38,12 @@ namespace Marble
 /**
  * Class that overrides necessary methods of GeoParser.
  * @see GeoParser
- */    
+ */
 class RouteParser : public GeoParser {
-    public:
-        explicit RouteParser();
-        virtual GeoDataDocument* createDocument() const;
-        virtual bool isValidRootElement();
+public:
+    explicit RouteParser();
+    virtual GeoDataDocument* createDocument() const;
+    virtual bool isValidRootElement();
 };
 
 RouteParser::RouteParser() : GeoParser( 0 )
@@ -65,24 +65,25 @@ bool RouteParser::isValidRootElement()
  * Private class for RouteSyncManager.
  */
 class RouteSyncManager::Private {
-    public:
-        explicit Private( RoutingManager *routingManager, MarbleWidget *marbleWidget );
-        
-        QDir m_cacheDir;
-        MarbleWidget *m_marbleWidget;
-        RoutingManager *m_routingManager;
-        CloudRoutesDialog *m_dialog;
-        QProgressDialog *m_uploadProgressDialog;
-        QProgressDialog *m_listDownloadProgressDialog;
+public:
+    Private( RoutingManager *routingManager, MarbleWidget *marbleWidget );
+
+    CloudRoutesDialog *m_dialog;
+    QDir m_cacheDir;
+    MarbleWidget *m_marbleWidget;
+    RoutingManager *m_routingManager;
+    QProgressDialog *m_uploadProgressDialog;
+    QProgressDialog *m_listDownloadProgressDialog;
 };
 
 RouteSyncManager::Private::Private( RoutingManager *routingManager, MarbleWidget *marbleWidget ) :
+    m_dialog(),
     m_marbleWidget( marbleWidget ),
     m_routingManager( routingManager ),
     m_uploadProgressDialog( new QProgressDialog() ),
     m_listDownloadProgressDialog( new QProgressDialog() )
 {
-    m_cacheDir = QDir( MarbleDirs::localPath() + "/sync/cache/routes/" );
+    m_cacheDir = QDir( MarbleDirs::localPath() + "/cloudsync/cache/routes/" );
     
     m_uploadProgressDialog->setMinimum( 0 );
     m_uploadProgressDialog->setMaximum( 100 );
@@ -103,22 +104,13 @@ QString RouteSyncManager::generateTimestamp() const
     qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
     return QString::number( timestamp );
 }
-    
+
 QString RouteSyncManager::saveDisplayedToCache() const
 {
-    // Save KML temporarily, to get its SHA1 summary.
-    QTemporaryFile temporaryFile;
-    temporaryFile.open();
-    d->m_routingManager->saveRoute( temporaryFile.fileName() );
-    QByteArray tempKml = temporaryFile.readAll();
-    
     d->m_cacheDir.mkpath( d->m_cacheDir.absolutePath() );
     
     const QString timestamp = generateTimestamp();
     const QString filename = d->m_cacheDir.absolutePath() + "/" + timestamp + ".kml";
-    // Move the temporary file to local cache, with its
-    // filename as timestamp.
-    // TODO: temporaryFile.rename( filename );
     d->m_routingManager->saveRoute( filename );
     return timestamp;
 }
@@ -137,15 +129,18 @@ void RouteSyncManager::uploadRoute()
         // done, all the data gets flushed and QFile::readAll()
         // returns nothing when called later.
         QFile routeFile( filename );
-        routeFile.open( QFile::ReadOnly );
-        QByteArray kml = routeFile.readAll();
-        routeFile.close();
-        
+        QByteArray kml;
+
+        if ( routeFile.open( QFile::ReadOnly ) ) {
+            kml = routeFile.readAll();
+            routeFile.close();
+        }
+
         // A QBuffer which uses the QByteArray "kml" needs to be
         // created for RouteParser::read().
         QBuffer buffer( &kml );
         buffer.open( QBuffer::ReadOnly );
-            
+
         RouteParser parser;
         parser.read( &buffer );
         buffer.close();
@@ -207,7 +202,7 @@ void RouteSyncManager::downloadRoute( QString timestamp )
 void RouteSyncManager::openRoute( QString timestamp )
 {
     d->m_routingManager->loadRoute( QString( "%0/%1.kml" )
-        .arg( d->m_cacheDir.absolutePath() ).arg( timestamp ) );
+                                    .arg( d->m_cacheDir.absolutePath() ).arg( timestamp ) );
 }
 
 void RouteSyncManager::deleteRoute( QString timestamp )
@@ -231,7 +226,7 @@ void RouteSyncManager::updateUploadProgressbar( qint64 sent, qint64 total )
 
 void RouteSyncManager::updateListDownloadProgressbar(qint64 received, qint64 total)
 {
-    qint64 percentage = 100.0 * received / total;
+    qint64 percentage = qRound( 100.0 * qreal( received ) / total );
     d->m_listDownloadProgressDialog->setValue( percentage );
     
     if( received == total ) {

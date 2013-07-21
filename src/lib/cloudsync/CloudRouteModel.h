@@ -40,7 +40,11 @@ class CloudRouteModel : public QAbstractListModel
         QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const;
         int rowCount( const QModelIndex& parent = QModelIndex() ) const;
         
-        void setItems( QVector<RouteItem> items );
+        /**
+         * Sets the list of routes that will show up in CloudRoutesDialog.
+         * @param items List of routes.
+         */
+        void setItems( const QVector<RouteItem> &items );
         
         /**
          * Checks if specified route exists in the local cache.
@@ -50,7 +54,7 @@ class CloudRouteModel : public QAbstractListModel
         bool isCached( const QModelIndex& index ) const;
         
         /**
-         * Removes route with given timestamp from local cache.
+         * Removes route with given index from local cache.
          * @param index Index of the route.
          */
         void removeFromCache( const QModelIndex index );

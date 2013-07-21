@@ -241,6 +241,7 @@ set(marblewidget_SRCS
     cloudsync/CloudRouteModel.cpp
     cloudsync/CloudRoutesDialog.cpp
     cloudsync/RouteItem.cpp
+    cloudsync/RouteItemDelegate.cpp
 )
 
 set (marblewidget_UI
@@ -466,6 +467,7 @@ else (APPLE AND QTONLY)
     cloudsync/CloudRouteModel.h
     cloudsync/CloudRoutesDialog.h
     cloudsync/RouteItem.h
+    cloudsync/RouteItemDelegate.h
 
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include/marble
 )

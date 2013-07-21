@@ -28,7 +28,7 @@ class RouteSyncManager : public SyncManager
     Q_OBJECT
     
     public:
-        explicit RouteSyncManager( RoutingManager *routingManager, MarbleWidget *marbleWidget );
+        RouteSyncManager( RoutingManager *routingManager, MarbleWidget *marbleWidget );
         
         /**
          * Generates a timestamp which will be used as an unique identifier.
@@ -46,6 +46,7 @@ class RouteSyncManager : public SyncManager
         /**
          * Uploads currently displayed route to cloud.
          * Initiates necessary methods of backends.
+         * Note that, this also runs saveDisplayedToCache() method.
          */
         void uploadRoute();
         
