@@ -234,7 +234,7 @@ set(marblewidget_SRCS
     kineticmodel.cpp
     NewstuffModel.cpp
     
-    cloudsync/SyncManager.cpp
+    cloudsync/CloudSyncManager.cpp
     cloudsync/RouteSyncManager.cpp
     cloudsync/AbstractSyncBackend.cpp
     cloudsync/OwncloudSyncBackend.cpp
@@ -277,7 +277,7 @@ set (marblewidget_UI
     MapThemeDownloadDialog.ui
     WebPopupWidget.ui
     cloudsync/CloudRoutesDialog.ui
-    MarbleSyncSettingsWidget.ui
+    MarbleCloudSyncSettingsWidget.ui
 )
 
 # FIXME: cleaner approach of src/lib/MarbleControlBox.* vs. marble.qrc
@@ -460,7 +460,7 @@ else (APPLE AND QTONLY)
     routing/RoutingModel.h
     routing/RoutingProfile.h
     
-    cloudsync/SyncManager.h
+    cloudsync/CloudSyncManager.h
     cloudsync/RouteSyncManager.h
     cloudsync/AbstractSyncBackend.h
     cloudsync/OwncloudSyncBackend.h

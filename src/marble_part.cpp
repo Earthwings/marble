@@ -105,7 +105,7 @@ using namespace Marble;
 #include "ui_MarbleViewSettingsWidget.h"
 #include "ui_MarbleNavigationSettingsWidget.h"
 #include "ui_MarbleTimeSettingsWidget.h"
-#include "ui_MarbleSyncSettingsWidget.h"
+#include "ui_MarbleCloudSyncSettingsWidget.h"
 
 namespace Marble
 {
@@ -195,9 +195,6 @@ MarblePart::MarblePart( QWidget *parentWidget, QObject *parent, const QVariantLi
     connect( m_controlView, SIGNAL(showUploadDialog()), this, SLOT(showUploadNewStuffDialog()) );
     connect( m_controlView, SIGNAL(showMapWizard()), this, SLOT(showMapWizard()) );
     connect( m_controlView, SIGNAL(mapThemeDeleted()), this, SLOT(fallBackToDefaultTheme()) );
-    connect( m_controlView->marbleWidget(), SIGNAL(cloudSettingsRequested()), this, SLOT(receiveCloudSettingsRequest()) );
-    connect( this, SIGNAL(cloudSettingsSent(QString,QString,QString)),
-             m_controlView->marbleWidget(), SIGNAL(cloudSettingsReceived(QString,QString,QString)) );
 }
 
 MarblePart::~MarblePart()
@@ -539,6 +536,10 @@ void MarblePart::readSettings()
     readPluginSettings();
 
     m_controlView->setExternalMapEditor( m_externalEditorMapping[MarbleSettings::externalMapEditor()] );
+
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudServer( MarbleSettings::owncloudServer() );
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudUsername( MarbleSettings::owncloudUsername() );
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudPassword( MarbleSettings::owncloudPassword() );
 }
 
 void MarblePart::readStatusBarSettings()
@@ -1394,12 +1395,12 @@ void MarblePart::editSettings()
     m_configDialog->addPage( w_timeSettings, i18n( "Date & Time" ), "clock" );
     
     // Sync page
-    Ui_MarbleSyncSettingsWidget ui_syncSettings;
-    QWidget *w_syncSettings = new QWidget( 0 );
+    Ui_MarbleCloudSyncSettingsWidget ui_cloudSyncSettings;
+    QWidget *w_cloudSyncSettings = new QWidget( 0 );
 
-    w_syncSettings->setObjectName( "sync_page" );
-    ui_syncSettings.setupUi( w_syncSettings );
-    m_configDialog->addPage( w_syncSettings, i18n( "Synchronization" ), "flag" );
+    w_cloudSyncSettings->setObjectName( "sync_page" );
+    ui_cloudSyncSettings.setupUi( w_cloudSyncSettings );
+    m_configDialog->addPage( w_cloudSyncSettings, i18n( "Synchronization" ), "flag" );
     
     // routing page
     RoutingProfilesWidget *w_routingSettings = new RoutingProfilesWidget( m_controlView->marbleModel() );
@@ -1755,14 +1756,6 @@ void MarblePart::updateMapEditButtonVisibility( const QString &mapTheme )
 void MarblePart::fallBackToDefaultTheme()
 {
     m_controlView->marbleWidget()->setMapThemeId( m_controlView->defaultMapThemeId() );
-}
-
-void MarblePart::receiveCloudSettingsRequest()
-{
-    QString server = MarbleSettings::syncServer();
-    QString username = MarbleSettings::syncUsername();
-    QString password = MarbleSettings::syncPassword();
-    emit cloudSettingsSent( server, username, password );
 }
 
 }

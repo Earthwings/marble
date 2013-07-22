@@ -68,6 +68,7 @@
 #include "routing/RoutingManager.h"
 #include "BookmarkManager.h"
 #include "ElevationModel.h"
+#include "cloudsync/CloudSyncManager.h"
 
 namespace Marble
 {
@@ -156,6 +157,9 @@ class MarbleModelPrivate
     bool                     m_workOffline;
 
     ElevationModel           *m_elevationModel;
+
+    // Cloud synchronization
+    CloudSyncManager        *m_cloudSyncManager;
 };
 
 MarbleModel::MarbleModel( QObject *parent )
@@ -191,6 +195,7 @@ MarbleModel::MarbleModel( QObject *parent )
             &d->m_sunLocator, SLOT(update()) );
 
     d->m_elevationModel = new ElevationModel( this );
+    d->m_cloudSyncManager = new CloudSyncManager( this );
 
 }
 
@@ -705,6 +710,12 @@ const ElevationModel* MarbleModel::elevationModel() const
 {
     return d->m_elevationModel;
 }
+
+CloudSyncManager *MarbleModel::cloudSyncManager()
+{
+    return d->m_cloudSyncManager;
+}
+
 
 }
 

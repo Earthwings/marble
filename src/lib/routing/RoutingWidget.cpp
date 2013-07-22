@@ -85,8 +85,6 @@ public:
     QToolButton *m_reverseRouteButton;
     QToolButton *m_clearRouteButton;
     QToolButton *m_configureButton;
-    
-    RouteSyncManager *m_routeSyncManager;
 
     /** Constructor */
     RoutingWidgetPrivate(RoutingWidget *parent, MarbleWidget *marbleWidget );
@@ -126,7 +124,6 @@ RoutingWidgetPrivate::RoutingWidgetPrivate( RoutingWidget *parent, MarbleWidget 
         m_currentFrame( 0 ),
         m_iconSize( 16 ),
         m_collapse_width( 0 ),
-        m_routeSyncManager( new RouteSyncManager( m_routingManager, m_widget ) ),
         m_parent( parent )
 {
     createProgressAnimation();
@@ -313,9 +310,7 @@ RoutingWidget::RoutingWidget( MarbleWidget *marbleWidget, QWidget *parent ) :
              this, SLOT(retrieveRoute()) );
     connect( d->m_routingManager->alternativeRoutesModel(), SIGNAL(rowsInserted(QModelIndex,int,int)),
              this, SLOT(updateAlternativeRoutes()) );
-    connect( d->m_routeSyncManager, SIGNAL(cloudSettingsRequested()), d->m_widget, SIGNAL(cloudSettingsRequested()) );
-    connect( d->m_widget, SIGNAL(cloudSettingsReceived(QString,QString,QString)), d->m_routeSyncManager, SLOT(receiveCloudSettings(QString,QString,QString)) );
-    
+
     d->m_ui.directionsListView->setModel( d->m_routingModel );
 
     QItemSelectionModel *selectionModel = d->m_ui.directionsListView->selectionModel();
@@ -341,6 +336,8 @@ RoutingWidget::RoutingWidget( MarbleWidget *marbleWidget, QWidget *parent ) :
     d->m_ui.resultLabel->setVisible( false );
     setShowDirectionsButtonVisible( false );
     updateActiveRoutingProfile();
+
+    d->m_widget->model()->cloudSyncManager()->initializeRouteSyncManager( d->m_routingManager );
 
     if ( MarbleGlobal::getInstance()->profiles() & MarbleGlobal::SmallScreen ) {
         d->m_ui.directionsListView->setVisible( false );
@@ -687,12 +684,12 @@ void RoutingWidget::saveRoute()
 
 void RoutingWidget::uploadToCloud()
 {
-    d->m_routeSyncManager->uploadRoute();
+    d->m_widget->model()->cloudSyncManager()->routeSyncManager()->uploadRoute();
 }
 
 void RoutingWidget::openCloudRoutesDialog()
 {
-    d->m_routeSyncManager->downloadRouteList();
+    d->m_widget->model()->cloudSyncManager()->routeSyncManager()->downloadRouteList();
 }
 
 void RoutingWidget::indicateRoutingFailure( GeoDataDocument* route )

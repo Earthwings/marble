@@ -16,7 +16,7 @@
 #include "ui_MarbleViewSettingsWidget.h"
 #include "ui_MarbleNavigationSettingsWidget.h"
 #include "ui_MarbleTimeSettingsWidget.h"
-#include "ui_MarbleSyncSettingsWidget.h"
+#include "ui_MarbleCloudSyncSettingsWidget.h"
 
 // Qt
 #include <QList>
@@ -65,7 +65,7 @@ class QtMarbleConfigDialogPrivate
     Ui::MarbleNavigationSettingsWidget ui_navigationSettings;
     Ui::MarbleTimeSettingsWidget       ui_timeSettings;
     Ui::MarbleCacheSettingsWidget      ui_cacheSettings;
-    Ui::MarbleSyncSettingsWidget       ui_syncSettings;
+    Ui::MarbleCloudSyncSettingsWidget  ui_cloudSyncSettings;
     MarblePluginSettingsWidget         *w_pluginSettings;
 
     QSettings m_settings;
@@ -161,9 +161,9 @@ QtMarbleConfigDialog::QtMarbleConfigDialog( MarbleWidget *marbleWidget, QWidget 
     connect( this, SIGNAL(rejected()), &d->m_pluginModel, SLOT(retrievePluginState()) );
     connect( this, SIGNAL(accepted()), &d->m_pluginModel, SLOT(applyPluginState()) );
     
-    QWidget *w_syncSettings = new QWidget( this );
-    d->ui_syncSettings.setupUi( w_syncSettings );
-    tabWidget->addTab( w_syncSettings, tr( "Synchronization" ) );
+    QWidget *w_cloudSyncSettings = new QWidget( this );
+    d->ui_cloudSyncSettings.setupUi( w_cloudSyncSettings );
+    tabWidget->addTab( w_cloudSyncSettings, tr( "Synchronization" ) );
 
     // Layout
     QVBoxLayout *layout = new QVBoxLayout( this );
@@ -283,12 +283,12 @@ void QtMarbleConfigDialog::readSettings()
     // Routing
 
     // ownCloud
-    d->ui_syncSettings.kcfg_enableSync->setChecked( syncEnabled() );
-    d->ui_syncSettings.kcfg_syncBookmarks->setChecked( bookmarkSyncEnabled() );
-    d->ui_syncSettings.kcfg_syncRoutes->setChecked( routeSyncEnabled() );
-    d->ui_syncSettings.kcfg_syncServer->setText( syncServer() );
-    d->ui_syncSettings.kcfg_syncUsername->setText( syncUsername() );
-    d->ui_syncSettings.kcfg_syncPassword->setText( syncPassword() );
+    d->ui_cloudSyncSettings.kcfg_enableSync->setChecked( syncEnabled() );
+    d->ui_cloudSyncSettings.kcfg_syncBookmarks->setChecked( bookmarkSyncEnabled() );
+    d->ui_cloudSyncSettings.kcfg_syncRoutes->setChecked( routeSyncEnabled() );
+    d->ui_cloudSyncSettings.kcfg_owncloudServer->setText( owncloudServer() );
+    d->ui_cloudSyncSettings.kcfg_owncloudUsername->setText( owncloudUsername() );
+    d->ui_cloudSyncSettings.kcfg_owncloudPassword->setText( owncloudPassword() );
     
     // Read the settings of the plugins
     d->m_marbleWidget->readPluginSettings( d->m_settings );
@@ -367,13 +367,14 @@ void QtMarbleConfigDialog::writeSettings()
     d->m_settings.setValue( "chosenTimezone", d->ui_timeSettings.kcfg_chosenTimezone->currentIndex() );
     d->m_settings.endGroup();
     
-    d->m_settings.beginGroup( "Sync" );
-    d->m_settings.setValue( "enableSync", d->ui_syncSettings.kcfg_enableSync->isChecked() );
-    d->m_settings.setValue( "syncBookmarks", d->ui_syncSettings.kcfg_syncBookmarks->isChecked() );
-    d->m_settings.setValue( "syncRoutes", d->ui_syncSettings.kcfg_syncRoutes->isChecked() );
-    d->m_settings.setValue( "syncServer", d->ui_syncSettings.kcfg_syncServer->text() );
-    d->m_settings.setValue( "syncUsername", d->ui_syncSettings.kcfg_syncUsername->text() );
-    d->m_settings.setValue( "syncPassword", d->ui_syncSettings.kcfg_syncPassword->text() );
+    d->m_settings.beginGroup( "CloudSync" );
+    d->m_settings.setValue( "enableSync", d->ui_cloudSyncSettings.kcfg_enableSync->isChecked() );
+    d->m_settings.setValue( "syncBackend", "owncloud" );
+    d->m_settings.setValue( "syncBookmarks", d->ui_cloudSyncSettings.kcfg_syncBookmarks->isChecked() );
+    d->m_settings.setValue( "syncRoutes", d->ui_cloudSyncSettings.kcfg_syncRoutes->isChecked() );
+    d->m_settings.setValue( "owncloudServer", d->ui_cloudSyncSettings.kcfg_owncloudServer->text() );
+    d->m_settings.setValue( "owncloudUsername", d->ui_cloudSyncSettings.kcfg_owncloudUsername->text() );
+    d->m_settings.setValue( "owncloudPassword", d->ui_cloudSyncSettings.kcfg_owncloudPassword->text() );
     d->m_settings.endGroup();
 
     // Plugins
@@ -569,32 +570,37 @@ void QtMarbleConfigDialog::initializeCustomTimezone()
 
 bool QtMarbleConfigDialog::syncEnabled() const
 {
-    return d->m_settings.value( "Sync/enableSync", "" ).toBool();
+    return d->m_settings.value( "CloudSync/enableSync", "" ).toBool();
+}
+
+QString QtMarbleConfigDialog::syncBackend() const
+{
+    return d->m_settings.value( "CloudSync/syncBackend", "" ).toString();
 }
 
 bool QtMarbleConfigDialog::bookmarkSyncEnabled() const
 {
-    return d->m_settings.value( "Sync/syncBookmarks", "" ).toBool();
+    return d->m_settings.value( "CloudSync/syncBookmarks", "" ).toBool();
 }
 
 bool QtMarbleConfigDialog::routeSyncEnabled() const
 {
-    return d->m_settings.value( "Sync/syncRoutes", "" ).toBool();
+    return d->m_settings.value( "CloudSync/syncRoutes", "" ).toBool();
 }
 
-QString QtMarbleConfigDialog::syncServer() const
+QString QtMarbleConfigDialog::owncloudServer() const
 {
-    return d->m_settings.value( "Sync/syncServer", "" ).toString();
+    return d->m_settings.value( "CloudSync/owncloudServer", "" ).toString();
 }
 
-QString QtMarbleConfigDialog::syncUsername() const
+QString QtMarbleConfigDialog::owncloudUsername() const
 {
-    return d->m_settings.value( "Sync/syncUsername", "" ).toString();
+    return d->m_settings.value( "CloudSync/owncloudUsername", "" ).toString();
 }
 
-QString QtMarbleConfigDialog::syncPassword() const
+QString QtMarbleConfigDialog::owncloudPassword() const
 {
-    return d->m_settings.value( "Sync/syncPassword", "" ).toString();
+    return d->m_settings.value( "CloudSync/owncloudPassword", "" ).toString();
 }
 
 }

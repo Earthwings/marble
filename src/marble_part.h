@@ -20,7 +20,7 @@
 #include <kmenu.h>
 #include <kurl.h>
 #include "MarbleGlobal.h"
-#include "cloudsync/SyncManager.h"
+#include "cloudsync/CloudSyncManager.h"
 #include <krecentfilesaction.h>
 
 class KAboutData;
@@ -76,7 +76,6 @@ class MarblePart: public KParts::ReadOnlyPart
     void  createPluginMenus();
     void  createFolderList();
     void  fallBackToDefaultTheme();
-    void  receiveCloudSettingsRequest();
     
   Q_SIGNALS:
     void  cloudSettingsSent( QString server, QString username, QString password );

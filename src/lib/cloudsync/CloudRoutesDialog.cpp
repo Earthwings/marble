@@ -32,12 +32,12 @@ CloudRoutesDialog::Private::Private() : Ui::CloudRoutesDialog(),
 {
 }
 
-CloudRoutesDialog::CloudRoutesDialog( QVector<RouteItem> routes, MarbleWidget* marbleWidget ) : QDialog( marbleWidget ),
+CloudRoutesDialog::CloudRoutesDialog( QVector<RouteItem> routes ) : QDialog(),
     d( new Private )
 {
     d->setupUi( this );
     
-    RouteItemDelegate *delegate = new RouteItemDelegate( d->listView, d->m_model, marbleWidget );
+    RouteItemDelegate *delegate = new RouteItemDelegate( d->listView, d->m_model );
     connect( delegate, SIGNAL(downloadButtonClicked(QString)), this, SIGNAL(downloadButtonClicked(QString)) );
     connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
     connect( delegate, SIGNAL(deleteButtonClicked(QString)), this, SIGNAL(deleteButtonClicked(QString)) );

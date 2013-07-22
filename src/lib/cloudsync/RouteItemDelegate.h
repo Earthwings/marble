@@ -13,7 +13,7 @@ class RouteItemDelegate : public QStyledItemDelegate {
     Q_OBJECT
     
 public:
-    RouteItemDelegate( QListView *view, CloudRouteModel *model, MarbleWidget *marbleWidget );
+    RouteItemDelegate( QListView *view, CloudRouteModel *model );
     ~RouteItemDelegate();
 
     void paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const;

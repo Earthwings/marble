@@ -5,7 +5,7 @@
 
 namespace Marble {
 
-RouteItemDelegate::RouteItemDelegate( QListView *view, CloudRouteModel *model, MarbleWidget *marbleWidget ) :
+RouteItemDelegate::RouteItemDelegate( QListView *view, CloudRouteModel *model ) :
     m_view( view ),
     m_model( model ),
     m_buttonWidth( 0 ),

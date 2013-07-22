@@ -31,6 +31,7 @@
 #include <QCryptographicHash>
 #include <QNetworkAccessManager>
 #include <QProgressDialog>
+#include <QNetworkReply>
 
 namespace Marble
 {
@@ -66,22 +67,23 @@ bool RouteParser::isValidRootElement()
  */
 class RouteSyncManager::Private {
 public:
-    Private( RoutingManager *routingManager, MarbleWidget *marbleWidget );
+    Private( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager );
 
-    CloudRoutesDialog *m_dialog;
+    CloudSyncManager *m_cloudSyncManager;
+
     QDir m_cacheDir;
-    MarbleWidget *m_marbleWidget;
+    CloudRoutesDialog *m_dialog;
     RoutingManager *m_routingManager;
     QProgressDialog *m_uploadProgressDialog;
     QProgressDialog *m_listDownloadProgressDialog;
 };
 
-RouteSyncManager::Private::Private( RoutingManager *routingManager, MarbleWidget *marbleWidget ) :
-    m_dialog(),
-    m_marbleWidget( marbleWidget ),
-    m_routingManager( routingManager ),
+RouteSyncManager::Private::Private( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager ) :
+    m_listDownloadProgressDialog( new QProgressDialog() ),
     m_uploadProgressDialog( new QProgressDialog() ),
-    m_listDownloadProgressDialog( new QProgressDialog() )
+    m_cloudSyncManager( cloudSyncManager ),
+    m_routingManager( routingManager ),
+    m_dialog()
 {
     m_cacheDir = QDir( MarbleDirs::localPath() + "/cloudsync/cache/routes/" );
     
@@ -94,8 +96,8 @@ RouteSyncManager::Private::Private( RoutingManager *routingManager, MarbleWidget
     m_listDownloadProgressDialog->setWindowTitle( tr( "Downloading route list..." ) );
 }
 
-RouteSyncManager::RouteSyncManager( RoutingManager *routingManager, MarbleWidget *marbleWidget ) :
-    d( new Private( routingManager, marbleWidget ) )
+RouteSyncManager::RouteSyncManager( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager ) :
+    d( new Private( cloudSyncManager, routingManager ) )
 {
 }
 
@@ -117,9 +119,9 @@ QString RouteSyncManager::saveDisplayedToCache() const
 
 void RouteSyncManager::uploadRoute()
 {
-    if ( backend() == Owncloud ) {
+    if ( d->m_cloudSyncManager->backend()  == CloudSyncManager::Owncloud ) {
         // TODO: Move most of the code to backend.
-        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( apiUrl() );
+        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( d->m_cloudSyncManager->apiUrl()  );
         
         QString timestamp = saveDisplayedToCache();
         QString filename = d->m_cacheDir.absolutePath() + "/" + timestamp + ".kml";
@@ -173,8 +175,8 @@ void RouteSyncManager::uploadRoute()
 
 void RouteSyncManager::downloadRouteList()
 {
-    if( backend() == Owncloud ) {
-        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( apiUrl() );
+    if( d->m_cloudSyncManager->backend()  == CloudSyncManager::Owncloud ) {
+        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( d->m_cloudSyncManager->apiUrl()  );
         connect( syncBackend, SIGNAL(routeListDownloaded(QVector<RouteItem>)), this, SLOT(openCloudRoutesDialog(QVector<RouteItem>)) );
         syncBackend->downloadRouteList();
     }
@@ -182,7 +184,7 @@ void RouteSyncManager::downloadRouteList()
 
 void RouteSyncManager::openCloudRoutesDialog( QVector<RouteItem> routes )
 {
-    d->m_dialog = new CloudRoutesDialog( routes, d->m_marbleWidget );
+    d->m_dialog = new CloudRoutesDialog( routes );
     connect( d->m_dialog, SIGNAL(downloadButtonClicked(QString)), this, SLOT(downloadRoute(QString)) );
     connect( d->m_dialog, SIGNAL(openButtonClicked(QString)), this, SLOT(openRoute(QString)) );
     connect( d->m_dialog, SIGNAL(deleteButtonClicked(QString)), this, SLOT(deleteRoute(QString)) );
@@ -191,8 +193,8 @@ void RouteSyncManager::openCloudRoutesDialog( QVector<RouteItem> routes )
 
 void RouteSyncManager::downloadRoute( QString timestamp )
 {
-    if( backend() == Owncloud ) {
-        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( apiUrl() );
+    if( d->m_cloudSyncManager->backend() == CloudSyncManager::Owncloud ) {
+        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( d->m_cloudSyncManager->apiUrl()  );
         connect( syncBackend, SIGNAL(routeDownloadProgress(qint64,qint64)),
                  d->m_dialog->model(), SLOT(updateProgress(qint64,qint64)) );
         syncBackend->downloadRoute( timestamp );
@@ -207,8 +209,8 @@ void RouteSyncManager::openRoute( QString timestamp )
 
 void RouteSyncManager::deleteRoute( QString timestamp )
 {
-    if( backend() == Owncloud ) {
-        OwncloudSyncBackend syncBackend( apiUrl() );
+    if( d->m_cloudSyncManager->backend() == CloudSyncManager::Owncloud ) {
+        OwncloudSyncBackend syncBackend( d->m_cloudSyncManager->apiUrl()  );
         syncBackend.deleteRoute( timestamp );
     }
 }

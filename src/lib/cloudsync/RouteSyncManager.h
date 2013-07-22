@@ -11,24 +11,22 @@
 #ifndef ROUTESYNCMANAGER_H
 #define ROUTESYNCMANAGER_H
 
-#include "SyncManager.h"
-#include "MarbleWidget.h"
-#include "RoutingManager.h"
+#include "routing/RoutingManager.h"
 #include "CloudRouteModel.h"
-
-#include <QNetworkReply>
+#include "marble_export.h"
 
 namespace Marble {
 
 class RouteParser;
 class RouteModel;
+class CloudSyncManager;
 
-class RouteSyncManager : public SyncManager
+class RouteSyncManager : public QObject
 {
     Q_OBJECT
     
     public:
-        RouteSyncManager( RoutingManager *routingManager, MarbleWidget *marbleWidget );
+        RouteSyncManager( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager );
         
         /**
          * Generates a timestamp which will be used as an unique identifier.

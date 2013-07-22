@@ -28,7 +28,7 @@
 #include "MarbleGlobal.h"             // types needed in all of marble.
 #include "marble_export.h"
 #include "GeoDataFolder.h"
-#include "cloudsync/SyncManager.h"
+#include "cloudsync/CloudSyncManager.h"
 // Qt
 class QAbstractItemModel;
 class QItemSelectionModel;
@@ -1032,10 +1032,6 @@ class MARBLE_EXPORT MarbleWidget : public QWidget
      * when the user moves the map around or zooms.
      */
     void visibleLatLonAltBoxChanged( const GeoDataLatLonAltBox& visibleLatLonAltBox );
-    
-    void cloudSettingsRequested();
-    
-    void cloudSettingsReceived( QString server, QString username, QString password );
 
  protected:
     /**

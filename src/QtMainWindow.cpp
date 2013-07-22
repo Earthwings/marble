@@ -1227,6 +1227,12 @@ void MainWindow::readSettings(const QVariantMap& overrideSettings)
      settings.beginGroup( "Navigation" );
      m_controlView->setExternalMapEditor( settings.value( "externalMapEditor", "" ).toString() );
      settings.endGroup();
+
+     settings.beginGroup( "CloudSync" );
+     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudServer( settings.value( "owncloudServer", "" ).toString() );
+     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudUsername( settings.value( "owncloudUsername", "" ).toString() );
+     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudPassword( settings.value( "owncloudPassword", "" ).toString() );
+     settings.endGroup();
 }
 
 void MainWindow::writeSettings()

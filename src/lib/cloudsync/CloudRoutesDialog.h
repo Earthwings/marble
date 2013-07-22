@@ -25,7 +25,7 @@ class CloudRoutesDialog : public QDialog
     Q_OBJECT
     
     public:
-        explicit CloudRoutesDialog( QVector<RouteItem> routes, MarbleWidget* marbleWidget );
+        explicit CloudRoutesDialog( QVector<RouteItem> routes );
         CloudRouteModel *model();
         
     signals:
