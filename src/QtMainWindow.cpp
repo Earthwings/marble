@@ -1414,6 +1414,10 @@ void MainWindow::updateSettings()
     m_controlView->marbleWidget()->setProxy( m_configDialog->proxyUrl(), m_configDialog->proxyPort(), m_configDialog->user(), m_configDialog->password() );
     */
 
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudServer( m_configDialog->owncloudServer() );
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudUsername( m_configDialog->owncloudUsername() );
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudPassword( m_configDialog->owncloudPassword() );
+
     m_controlView->marbleWidget()->update();
 }
 
