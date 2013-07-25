@@ -23,17 +23,17 @@ namespace Marble {
 
 class CloudRoutesDialog::Private : public Ui::CloudRoutesDialog {
     public:
-        explicit Private();
+        explicit Private( CloudRouteModel *model );
         CloudRouteModel *m_model;
 };
 
-CloudRoutesDialog::Private::Private() : Ui::CloudRoutesDialog(),
-    m_model( new CloudRouteModel() )
+CloudRoutesDialog::Private::Private( CloudRouteModel *model ) : Ui::CloudRoutesDialog(),
+    m_model( model )
 {
 }
 
-CloudRoutesDialog::CloudRoutesDialog( QVector<RouteItem> routes ) : QDialog(),
-    d( new Private )
+CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model ) : QDialog(),
+    d( new Private( model ) )
 {
     d->setupUi( this );
     
@@ -41,8 +41,7 @@ CloudRoutesDialog::CloudRoutesDialog( QVector<RouteItem> routes ) : QDialog(),
     connect( delegate, SIGNAL(downloadButtonClicked(QString)), this, SIGNAL(downloadButtonClicked(QString)) );
     connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
     connect( delegate, SIGNAL(deleteButtonClicked(QString)), this, SIGNAL(deleteButtonClicked(QString)) );
-    
-    d->m_model->setItems( routes );
+
     d->listView->setItemDelegate( delegate );
     d->listView->setModel( d->m_model );
 }

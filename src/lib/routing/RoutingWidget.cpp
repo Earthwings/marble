@@ -25,6 +25,7 @@
 #include "GeoDataDocument.h"
 #include "AlternativeRoutesModel.h"
 #include "RouteSyncManager.h"
+#include "CloudRoutesDialog.h"
 
 #include <QTime>
 #include <QTimer>
@@ -689,7 +690,15 @@ void RoutingWidget::uploadToCloud()
 
 void RoutingWidget::openCloudRoutesDialog()
 {
-    d->m_widget->model()->cloudSyncManager()->routeSyncManager()->downloadRouteList();
+    RouteSyncManager *manager = d->m_widget->model()->cloudSyncManager()->routeSyncManager();
+    QTimer::singleShot( 0, manager, SLOT(downloadRouteList()) );
+
+    CloudRoutesDialog *dialog = new CloudRoutesDialog( manager->model() );
+    connect( manager, SIGNAL(routeDownloadProgress(qint64,qint64)), manager->model(), SLOT(updateProgress(qint64,qint64)) );
+    connect( dialog, SIGNAL(downloadButtonClicked(QString)), manager, SLOT(downloadRoute(QString)) );
+    connect( dialog, SIGNAL(openButtonClicked(QString)), manager, SLOT(openRoute(QString)) );
+    connect( dialog, SIGNAL(deleteButtonClicked(QString)), manager, SLOT(deleteRoute(QString)) );
+    dialog->exec();
 }
 
 void RoutingWidget::indicateRoutingFailure( GeoDataDocument* route )

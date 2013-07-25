@@ -35,6 +35,7 @@ class OwncloudSyncBackend::Private {
         QNetworkReply *m_routeUploadReply;
         QNetworkReply *m_routeListReply;
         QNetworkReply *m_routeDownloadReply;
+        QNetworkReply *m_routeDeleteReply;
         
         QString m_routeUploadEndpoint;
         QString m_routeListEndpoint;
@@ -94,7 +95,8 @@ void OwncloudSyncBackend::deleteRoute(QString timestamp)
 {
     QUrl url( endpointUrl( d->m_routeDeleteEndpoint, timestamp ) );
     QNetworkRequest request( url );
-    d->m_network->deleteResource( request );
+    d->m_routeDeleteReply = d->m_network->deleteResource( request );
+    connect( d->m_routeDeleteReply, SIGNAL(finished()), this, SIGNAL(routeDeleted()) );
 }
 
 void OwncloudSyncBackend::cancelUpload()

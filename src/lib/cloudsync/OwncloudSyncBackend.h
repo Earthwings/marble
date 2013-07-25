@@ -42,6 +42,7 @@ private slots:
 signals:
     void routeListDownloaded( QVector<RouteItem> rawRouteList );
     void routeDownloaded( QString rawRoute, QString timestamp );
+    void routeDeleted();
     void routeUploadProgress( qint64 sent, qint64 total );
     void routeDownloadProgress( qint64 received, qint64 total );
     
