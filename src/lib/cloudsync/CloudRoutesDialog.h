@@ -42,6 +42,7 @@ private:
 
 private slots:
     void hideListDownloadProgressbar();
+    void displayNoRouteLabel();
 };
 
 }

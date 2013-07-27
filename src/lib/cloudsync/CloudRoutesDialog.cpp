@@ -37,8 +37,10 @@ CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model ) : QDialog(),
     connect( delegate, SIGNAL(downloadButtonClicked(QString)), this, SIGNAL(downloadButtonClicked(QString)) );
     connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
     connect( delegate, SIGNAL(deleteButtonClicked(QString)), this, SIGNAL(deleteButtonClicked(QString)) );
+    connect( d->m_model, SIGNAL(modelReset()), this, SLOT(displayNoRouteLabel()) );
 
     d->progressBar->setHidden( true );
+    d->labelNoRoute->setHidden( true );
 
     d->listView->setItemDelegate( delegate );
     d->listView->setModel( d->m_model );
@@ -60,6 +62,16 @@ void CloudRoutesDialog::updateListDownloadProgressbar( qint64 received, qint64 t
 
 void CloudRoutesDialog::hideListDownloadProgressbar() {
     d->progressBar->setHidden( true );
+}
+
+void CloudRoutesDialog::displayNoRouteLabel() {
+    if ( d->listView->model()->rowCount() == 0 ) {
+        d->listView->setHidden( true );
+        d->labelNoRoute->setHidden( false );
+    } else {
+        d->listView->setHidden( false );
+        d->labelNoRoute->setHidden( true );
+    }
 }
 
 }
