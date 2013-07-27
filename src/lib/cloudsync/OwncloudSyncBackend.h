@@ -45,6 +45,7 @@ signals:
     void routeDeleted();
     void routeUploadProgress( qint64 sent, qint64 total );
     void routeDownloadProgress( qint64 received, qint64 total );
+    void routeListDownloadProgress( qint64 received, qint64 total );
     
 private:
     class Private;

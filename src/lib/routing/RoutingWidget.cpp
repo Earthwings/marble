@@ -694,6 +694,7 @@ void RoutingWidget::openCloudRoutesDialog()
     QTimer::singleShot( 0, manager, SLOT(downloadRouteList()) );
 
     CloudRoutesDialog *dialog = new CloudRoutesDialog( manager->model() );
+    connect( manager, SIGNAL(routeListDownloadProgress(qint64,qint64)), dialog, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
     connect( manager, SIGNAL(routeDownloadProgress(qint64,qint64)), manager->model(), SLOT(updateProgress(qint64,qint64)) );
     connect( dialog, SIGNAL(downloadButtonClicked(QString)), manager, SLOT(downloadRoute(QString)) );
     connect( dialog, SIGNAL(openButtonClicked(QString)), manager, SLOT(openRoute(QString)) );

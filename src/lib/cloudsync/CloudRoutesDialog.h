@@ -24,18 +24,24 @@ class CloudRoutesDialog : public QDialog
 {
     Q_OBJECT
     
-    public:
-        explicit CloudRoutesDialog( CloudRouteModel *model );
-        CloudRouteModel *model();
-        
-    signals:
-        void downloadButtonClicked( QString timestamp );
-        void openButtonClicked( QString timestamp );
-        void deleteButtonClicked( QString timestamp );
-        
-    private:
-        class Private;
-        Private *d;
+public:
+    explicit CloudRoutesDialog( CloudRouteModel *model );
+    CloudRouteModel *model();
+
+public slots:
+    void updateListDownloadProgressbar( qint64 received, qint64 total );
+
+signals:
+    void downloadButtonClicked( QString timestamp );
+    void openButtonClicked( QString timestamp );
+    void deleteButtonClicked( QString timestamp );
+
+private:
+    class Private;
+    Private *d;
+
+private slots:
+    void hideListDownloadProgressbar();
 };
 
 }

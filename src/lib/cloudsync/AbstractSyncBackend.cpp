@@ -24,7 +24,7 @@ AbstractSyncBackend::Private::Private( QUrl apiUrl ) : m_apiUrl( apiUrl )
 {
 }
 
-AbstractSyncBackend::AbstractSyncBackend( const QUrl &apiUrl, QObject *parent ) : QObject(), d( new Private( apiUrl ) )
+AbstractSyncBackend::AbstractSyncBackend( const QUrl &apiUrl, QObject *parent ) : QObject( parent ), d( new Private( apiUrl ) )
 {
 }
 

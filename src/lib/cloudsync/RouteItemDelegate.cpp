@@ -84,8 +84,9 @@ QSize RouteItemDelegate::sizeHint( const QStyleOptionViewItem& option, const QMo
     if ( index.column() == 0 ) {
         QTextDocument doc;
         doc.setDefaultFont( option.font );
+        doc.setTextWidth( qMax( 200, m_view->contentsRect().width() - buttonWidth( option ) ) );
         doc.setHtml( text( index ) );
-        return QSize( 0, doc.size().height() );
+        return QSize( 0, qMax( 55, qRound( doc.size().height() ) ) );
     }
 
     return QSize();
@@ -93,9 +94,10 @@ QSize RouteItemDelegate::sizeHint( const QStyleOptionViewItem& option, const QMo
 
 bool RouteItemDelegate::editorEvent( QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index )
 {
+    Q_UNUSED( model );
+
     if ( ( event->type() == QEvent::MouseButtonRelease ) ) {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent*>( event );
-        CloudRouteModel *routeModel = static_cast<CloudRouteModel*>( model );
         QPoint pos = mouseEvent->pos();
         
         bool cached = index.data( CloudRouteModel::IsCached ).toBool();
@@ -187,10 +189,12 @@ QStyleOptionButton RouteItemDelegate::button( Element element, const QStyleOptio
 
 QString RouteItemDelegate::text( const QModelIndex& index ) const
 {
-    return QString( "%0<br /><b>Duration:</b> %1<br/><b>Distance:</b> %2" )
-            .arg( index.data( CloudRouteModel::Name ).toString() )
-            .arg( index.data( CloudRouteModel::Duration ).toString() )
-            .arg( index.data( CloudRouteModel::Distance ).toString() );
+    return QString( "%0" ).arg( index.data( CloudRouteModel::Name ).toString() );
+    // TODO: Show distance and duration
+    //return QString( "%0<br /><b>Duration:</b> %1<br/><b>Distance:</b> %2" )
+            //.arg( index.data( CloudRouteModel::Name ).toString() )
+            //.arg( index.data( CloudRouteModel::Duration ).toString() )
+            //.arg( index.data( CloudRouteModel::Distance ).toString() );
 }
 
 QRect RouteItemDelegate::position( Element element, const QStyleOptionViewItem& option ) const
@@ -199,6 +203,7 @@ QRect RouteItemDelegate::position( Element element, const QStyleOptionViewItem& 
     QPoint const firstColumn = option.rect.topLeft();
     QPoint const secondColumn = firstColumn + QPoint( option.decorationSize.width(), 0 );
     QPoint const thirdColumn = secondColumn + QPoint( option.rect.width() - width - option.decorationSize.width(), 0 );
+
     switch (element) {
     case Text:
         return QRect( secondColumn, QSize( thirdColumn.x() - secondColumn.x(), option.rect.height() ) );

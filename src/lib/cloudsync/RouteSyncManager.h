@@ -103,6 +103,7 @@ signals:
      */
     void routeListReady();
     void routeDownloadProgress( qint64 received, qint64 total );
+    void routeListDownloadProgress( qint64 received, qint64 total );
 
 private:
     class Private;

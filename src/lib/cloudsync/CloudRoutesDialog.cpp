@@ -13,11 +13,7 @@
 
 #include "RouteItemDelegate.h"
 
-#include <QDebug>
-#include <QPainter>
-#include <QApplication>
-#include <QTextDocument>
-#include <QAbstractTextDocumentLayout>
+#include <QTimer>
 
 namespace Marble {
 
@@ -42,6 +38,8 @@ CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model ) : QDialog(),
     connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
     connect( delegate, SIGNAL(deleteButtonClicked(QString)), this, SIGNAL(deleteButtonClicked(QString)) );
 
+    d->progressBar->setHidden( true );
+
     d->listView->setItemDelegate( delegate );
     d->listView->setModel( d->m_model );
 }
@@ -49,6 +47,19 @@ CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model ) : QDialog(),
 CloudRouteModel* CloudRoutesDialog::model()
 {
     return d->m_model;
+}
+
+void CloudRoutesDialog::updateListDownloadProgressbar( qint64 received, qint64 total )
+{
+    d->progressBar->setHidden( false );
+    d->progressBar->setValue( qRound( 100.0 * qreal( received ) / total ) );
+    if( received == total ) {
+        QTimer::singleShot( 1000, this, SLOT(hideListDownloadProgressbar()) );
+    }
+}
+
+void CloudRoutesDialog::hideListDownloadProgressbar() {
+    d->progressBar->setHidden( true );
 }
 
 }

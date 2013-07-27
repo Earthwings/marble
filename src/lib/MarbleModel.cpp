@@ -97,7 +97,8 @@ class MarbleModelPrivate
           m_bookmarkManager( &m_treeModel ),
           m_routingManager( 0 ),
           m_legend( 0 ),
-          m_workOffline( false )
+          m_workOffline( false ),
+          m_cloudSyncManager( new CloudSyncManager() )
     {
         m_descendantProxy.setSourceModel( &m_treeModel );
 
@@ -159,7 +160,7 @@ class MarbleModelPrivate
     ElevationModel           *m_elevationModel;
 
     // Cloud synchronization
-    CloudSyncManager        *m_cloudSyncManager;
+    CloudSyncManager        m_cloudSyncManager;
 };
 
 MarbleModel::MarbleModel( QObject *parent )
@@ -195,8 +196,6 @@ MarbleModel::MarbleModel( QObject *parent )
             &d->m_sunLocator, SLOT(update()) );
 
     d->m_elevationModel = new ElevationModel( this );
-    d->m_cloudSyncManager = new CloudSyncManager( this );
-
 }
 
 MarbleModel::~MarbleModel()
@@ -713,7 +712,7 @@ const ElevationModel* MarbleModel::elevationModel() const
 
 CloudSyncManager *MarbleModel::cloudSyncManager()
 {
-    return d->m_cloudSyncManager;
+    return &d->m_cloudSyncManager;
 }
 
 

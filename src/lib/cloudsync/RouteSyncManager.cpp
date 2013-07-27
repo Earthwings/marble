@@ -178,6 +178,7 @@ void RouteSyncManager::downloadRouteList()
     if( d->m_cloudSyncManager->backend()  == CloudSyncManager::Owncloud ) {
         OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( d->m_cloudSyncManager->apiUrl()  );
         connect( syncBackend, SIGNAL(routeListDownloaded(QVector<RouteItem>)), this, SLOT(processRouteList(QVector<RouteItem>)) );
+        connect( syncBackend, SIGNAL(routeListDownloadProgress(qint64,qint64)), this, SIGNAL(routeListDownloadProgress(qint64,qint64)) );
         syncBackend->downloadRouteList();
     }
 }

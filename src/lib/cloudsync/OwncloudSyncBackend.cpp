@@ -80,6 +80,7 @@ void OwncloudSyncBackend::downloadRouteList()
 {    
     QNetworkRequest request( endpointUrl( d->m_routeListEndpoint ) );
     d->m_routeListReply = d->m_network->get( request );
+    connect( d->m_routeListReply, SIGNAL(downloadProgress(qint64,qint64)), this, SIGNAL(routeListDownloadProgress(qint64,qint64)) );
     connect( d->m_routeListReply, SIGNAL(finished()), this, SLOT(prepareRouteList()) );
 }
 
