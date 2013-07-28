@@ -188,18 +188,20 @@ void RoutingWidgetPrivate::setupToolBar()
     m_saveRouteButton->setToolTip( QObject::tr("Save Route") );
     m_saveRouteButton->setIcon( QIcon(":/icons/16x16/document-save.png") );
     m_toolBar->addWidget(m_saveRouteButton);
-    
-    m_toolBar->addSeparator();
 
     m_uploadToCloudButton = new QToolButton;
     m_uploadToCloudButton->setToolTip( QObject::tr("Upload to Cloud") );
     m_uploadToCloudButton->setIcon( QIcon(":/icons/cloud-upload.png") );
-    m_toolBar->addWidget(m_uploadToCloudButton);
 
     m_openCloudRoutesButton = new QToolButton;
     m_openCloudRoutesButton->setToolTip( QObject::tr("Manage Cloud Routes") );
     m_openCloudRoutesButton->setIcon( QIcon(":/icons/cloud-download.png") );
-    m_toolBar->addWidget(m_openCloudRoutesButton);
+
+    if( m_widget->model()->cloudSyncManager()->isSyncEnabled() && m_widget->model()->cloudSyncManager()->isRouteSyncEnabled() ) {
+        m_toolBar->addSeparator();
+        m_toolBar->addWidget(m_uploadToCloudButton);
+        m_toolBar->addWidget(m_openCloudRoutesButton);
+    }
 
     m_toolBar->addSeparator();
 

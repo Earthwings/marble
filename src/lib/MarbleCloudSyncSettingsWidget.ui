@@ -61,14 +61,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="kcfg_syncBookmarks">
+    <widget class="QCheckBox" name="kcfg_syncRoutes">
      <property name="text">
       <string>Enable route synchronization</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="kcfg_syncRoutes">
+    <widget class="QCheckBox" name="kcfg_syncBookmarks">
      <property name="text">
       <string>Enable bookmark synchronization</string>
      </property>

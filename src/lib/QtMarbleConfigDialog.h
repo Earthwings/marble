@@ -97,8 +97,8 @@ class MARBLE_EXPORT QtMarbleConfigDialog : public QDialog
     // CloudSync settings
     bool syncEnabled() const;
     QString syncBackend() const;
-    bool bookmarkSyncEnabled() const;
-    bool routeSyncEnabled() const;
+    bool syncBookmarks() const;
+    bool syncRoutes() const;
     QString owncloudServer() const;
     QString owncloudUsername() const;
     QString owncloudPassword() const;

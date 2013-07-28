@@ -537,6 +537,8 @@ void MarblePart::readSettings()
 
     m_controlView->setExternalMapEditor( m_externalEditorMapping[MarbleSettings::externalMapEditor()] );
 
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setSyncEnabled( MarbleSettings::enableSync() );
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setRouteSyncEnabled( MarbleSettings::syncRoutes() );
     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudServer( MarbleSettings::owncloudServer() );
     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudUsername( MarbleSettings::owncloudUsername() );
     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudPassword( MarbleSettings::owncloudPassword() );
@@ -1574,6 +1576,8 @@ void MarblePart::updateSettings()
     m_controlView->setExternalMapEditor( m_externalEditorMapping[MarbleSettings::externalMapEditor()] );
     m_controlView->marbleWidget()->inputHandler()->setInertialEarthRotationEnabled( MarbleSettings::inertialEarthRotation() );
 
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setSyncEnabled( MarbleSettings::enableSync() );
+    m_controlView->marbleWidget()->model()->cloudSyncManager()->setRouteSyncEnabled( MarbleSettings::syncRoutes() );
     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudServer( MarbleSettings::owncloudServer() );
     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudUsername( MarbleSettings::owncloudUsername() );
     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudPassword( MarbleSettings::owncloudPassword() );

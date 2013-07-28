@@ -65,13 +65,9 @@ void CloudRoutesDialog::hideListDownloadProgressbar() {
 }
 
 void CloudRoutesDialog::displayNoRouteLabel() {
-    if ( d->listView->model()->rowCount() == 0 ) {
-        d->listView->setHidden( true );
-        d->labelNoRoute->setHidden( false );
-    } else {
-        d->listView->setHidden( false );
-        d->labelNoRoute->setHidden( true );
-    }
+    bool const isEmpty = d->listView->model()->rowCount() == 0;
+    d->listView->setHidden( isEmpty );
+    d->labelNoRoute->setVisible( isEmpty );
 }
 
 }

@@ -35,6 +35,18 @@ public:
     };
 
     /**
+     * Checks if the user enabled synchronization.
+     * @return true if synchronization enabled
+     */
+    bool isSyncEnabled();
+
+    /**
+     * Checks if the user enabled route synchronization.
+     * @return true if route synchronization enabled
+     */
+    bool isRouteSyncEnabled();
+
+    /**
      * Getter for currently selected backend.
      * @return Selected backend
      */
@@ -57,6 +69,18 @@ public:
      * @return ownCloud password
      */
     QString password();
+
+    /**
+     * Setter for enabling/disabling synchronization.
+     * @param enabled Status of synchronization.
+     */
+    void setSyncEnabled( const bool &enabled );
+
+    /**
+     * Setter for enabling/disabling synchronization.
+     * @param enabled Status of route synchronization
+     */
+    void setRouteSyncEnabled( const bool &enabled );
 
     /**
      * Setter for ownCloud server.

@@ -20,6 +20,9 @@ public:
 
     RouteSyncManager *m_routeSyncManager;
 
+    bool m_syncEnabled;
+    bool m_routeSyncEnabled;
+
     QString m_server;
     QString m_username;
     QString m_password;
@@ -27,6 +30,8 @@ public:
 
 CloudSyncManager::Private::Private() :
     m_routeSyncManager(),
+    m_syncEnabled( false ),
+    m_routeSyncEnabled( false ),
     m_server(),
     m_username(),
     m_password()
@@ -53,6 +58,16 @@ CloudSyncManager::Backend CloudSyncManager::backend()
     return Owncloud;
 }
 
+bool CloudSyncManager::isSyncEnabled()
+{
+    return d->m_syncEnabled;
+}
+
+bool CloudSyncManager::isRouteSyncEnabled()
+{
+    return d->m_routeSyncEnabled;
+}
+
 QString CloudSyncManager::server()
 {
     return d->m_server;
@@ -66,6 +81,16 @@ QString CloudSyncManager::username()
 QString CloudSyncManager::password()
 {
     return d->m_password;
+}
+
+void CloudSyncManager::setSyncEnabled( const bool &enabled )
+{
+    d->m_syncEnabled = enabled;
+}
+
+void CloudSyncManager::setRouteSyncEnabled( const bool &enabled )
+{
+    d->m_routeSyncEnabled = enabled;
 }
 
 void CloudSyncManager::setOwncloudServer( const QString &server )

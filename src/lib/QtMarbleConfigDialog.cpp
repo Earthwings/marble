@@ -284,8 +284,8 @@ void QtMarbleConfigDialog::readSettings()
 
     // ownCloud
     d->ui_cloudSyncSettings.kcfg_enableSync->setChecked( syncEnabled() );
-    d->ui_cloudSyncSettings.kcfg_syncBookmarks->setChecked( bookmarkSyncEnabled() );
-    d->ui_cloudSyncSettings.kcfg_syncRoutes->setChecked( routeSyncEnabled() );
+    d->ui_cloudSyncSettings.kcfg_syncBookmarks->setChecked( syncBookmarks() );
+    d->ui_cloudSyncSettings.kcfg_syncRoutes->setChecked( syncRoutes() );
     d->ui_cloudSyncSettings.kcfg_owncloudServer->setText( owncloudServer() );
     d->ui_cloudSyncSettings.kcfg_owncloudUsername->setText( owncloudUsername() );
     d->ui_cloudSyncSettings.kcfg_owncloudPassword->setText( owncloudPassword() );
@@ -578,12 +578,12 @@ QString QtMarbleConfigDialog::syncBackend() const
     return d->m_settings.value( "CloudSync/syncBackend", "" ).toString();
 }
 
-bool QtMarbleConfigDialog::bookmarkSyncEnabled() const
+bool QtMarbleConfigDialog::syncBookmarks() const
 {
     return d->m_settings.value( "CloudSync/syncBookmarks", "" ).toBool();
 }
 
-bool QtMarbleConfigDialog::routeSyncEnabled() const
+bool QtMarbleConfigDialog::syncRoutes() const
 {
     return d->m_settings.value( "CloudSync/syncRoutes", "" ).toBool();
 }
