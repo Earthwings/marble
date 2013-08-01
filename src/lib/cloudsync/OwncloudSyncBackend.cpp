@@ -179,6 +179,7 @@ void OwncloudSyncBackend::uploadRoute( const QString &timestamp )
     data.append( QString( boundary + "\r\n" ).toUtf8() );
 
     d->m_routeUploadReply = d->m_network->post( request, data );
+    connect( d->m_routeUploadReply, SIGNAL(uploadProgress(qint64,qint64)), this, SIGNAL(routeUploadProgress(qint64,qint64)) );
 }
 
 void OwncloudSyncBackend::downloadRouteList()
