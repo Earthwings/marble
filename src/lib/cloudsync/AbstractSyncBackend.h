@@ -24,7 +24,7 @@ public:
     ~AbstractSyncBackend();
 
     QUrl endpointUrl( const QString &endpoint );
-    QUrl endpointUrl( const QString &endpoint, QString &parameter );
+    QUrl endpointUrl( const QString &endpoint, const QString &parameter );
 
 private:
     class Private;

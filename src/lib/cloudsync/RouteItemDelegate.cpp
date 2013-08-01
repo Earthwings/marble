@@ -1,7 +1,9 @@
 #include "RouteItemDelegate.h"
+
+#include <QPainter>
+#include <QWebView>
 #include <QApplication>
 #include <QAbstractTextDocumentLayout>
-#include <QPainter>
 
 namespace Marble {
 
@@ -9,7 +11,9 @@ RouteItemDelegate::RouteItemDelegate( QListView *view, CloudRouteModel *model ) 
     m_view( view ),
     m_model( model ),
     m_buttonWidth( 0 ),
-    m_iconSize( 16 )
+    m_iconSize( 16 ),
+    m_previewSize( 128 ),
+    m_margin( 8 )
 {
 }
 
@@ -28,7 +32,11 @@ void RouteItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& op
     if ( styleOption.state & QStyle::State_Selected)  {
         paintContext.palette.setColor( QPalette::Text, styleOption.palette.color( QPalette::Active, QPalette::HighlightedText ) );
     }
-    
+
+    QRect const iconRect = position( Preview, option );
+    QIcon const icon = qVariantValue<QIcon>( index.data( Qt::DecorationRole ) );
+    painter->drawPixmap( iconRect, icon.pixmap( iconRect.size() ) );
+
     QTextDocument document;
     QRect const textRect = position( Text, option );
     document.setTextWidth( textRect.width() );
@@ -84,9 +92,10 @@ QSize RouteItemDelegate::sizeHint( const QStyleOptionViewItem& option, const QMo
     if ( index.column() == 0 ) {
         QTextDocument doc;
         doc.setDefaultFont( option.font );
-        doc.setTextWidth( qMax( 200, m_view->contentsRect().width() - buttonWidth( option ) ) );
+        doc.setTextWidth( qMax( 128, m_view->contentsRect().width() - m_previewSize - buttonWidth( option ) ) );
         doc.setHtml( text( index ) );
-        return QSize( 0, qMax( 55, qRound( doc.size().height() ) ) );
+        return QSize( qMax( 256, qRound( m_previewSize + buttonWidth( option ) + doc.size().width() + m_margin * 2 ) ),
+                      qMax( m_previewSize + m_margin * 2, qRound( doc.size().height() ) ) );
     }
 
     return QSize();
@@ -200,9 +209,9 @@ QString RouteItemDelegate::text( const QModelIndex& index ) const
 QRect RouteItemDelegate::position( Element element, const QStyleOptionViewItem& option ) const
 {   
     int const width = buttonWidth( option );
-    QPoint const firstColumn = option.rect.topLeft();
-    QPoint const secondColumn = firstColumn + QPoint( option.decorationSize.width(), 0 );
-    QPoint const thirdColumn = secondColumn + QPoint( option.rect.width() - width - option.decorationSize.width(), 0 );
+    QPoint const firstColumn = option.rect.topLeft() + QPoint( m_margin, m_margin );
+    QPoint const secondColumn = firstColumn + QPoint( m_previewSize + m_margin, 0 );
+    QPoint const thirdColumn = QPoint( option.rect.width() - width - option.decorationSize.width(), firstColumn.y() );
 
     switch (element) {
     case Text:
@@ -229,6 +238,10 @@ QRect RouteItemDelegate::position( Element element, const QStyleOptionViewItem& 
     {
         QSize const progressSize = QSize( width, option.fontMetrics.height() + 4 );
         return QRect( thirdColumn + QPoint( 0, 10 ), progressSize );
+    }
+    case Preview:
+    {
+        return QRect( firstColumn, QSize( m_previewSize, m_previewSize) );
     }
     }
     

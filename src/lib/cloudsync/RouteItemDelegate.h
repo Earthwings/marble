@@ -33,7 +33,8 @@ private:
         DownloadButton,
         RemoveFromCacheButton,
         RemoveFromCloudButton,
-        Progressbar
+        Progressbar,
+        Preview
     };
 
     int buttonWidth( const QStyleOptionViewItem &option ) const;
@@ -45,6 +46,8 @@ private:
     CloudRouteModel *m_model;
     mutable int m_buttonWidth;
     int const m_iconSize;
+    int const m_previewSize;
+    int const m_margin;
 };
 
 }

@@ -37,32 +37,6 @@ namespace Marble
 {
 
 /**
- * Class that overrides necessary methods of GeoParser.
- * @see GeoParser
- */
-class RouteParser : public GeoParser {
-public:
-    explicit RouteParser();
-    virtual GeoDataDocument* createDocument() const;
-    virtual bool isValidRootElement();
-};
-
-RouteParser::RouteParser() : GeoParser( 0 )
-{
-    // Nothing to do.
-}
-
-GeoDataDocument* RouteParser::createDocument() const
-{
-    return new GeoDataDocument;
-}
-
-bool RouteParser::isValidRootElement()
-{
-    return isValidElement(kml::kmlTag_kml);
-}
-
-/**
  * Private class for RouteSyncManager.
  */
 class RouteSyncManager::Private {
@@ -119,58 +93,60 @@ QString RouteSyncManager::saveDisplayedToCache() const
 
 void RouteSyncManager::uploadRoute()
 {
-    if ( d->m_cloudSyncManager->backend()  == CloudSyncManager::Owncloud ) {
-        // TODO: Move most of the code to backend.
-        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( d->m_cloudSyncManager->apiUrl()  );
+    OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( d->m_cloudSyncManager->apiUrl()  );
+    syncBackend->uploadRoute( saveDisplayedToCache() );
+//    if ( d->m_cloudSyncManager->backend()  == CloudSyncManager::Owncloud ) {
+//        // TODO: Move most of the code to backend.
+//        OwncloudSyncBackend *syncBackend = new OwncloudSyncBackend( d->m_cloudSyncManager->apiUrl()  );
         
-        QString timestamp = saveDisplayedToCache();
-        QString filename = d->m_cacheDir.absolutePath() + "/" + timestamp + ".kml";
+//        QString timestamp = saveDisplayedToCache();
+//        QString filename = d->m_cacheDir.absolutePath() + "/" + timestamp + ".kml";
         
-        // All data from the KML file has to be transferred into a
-        // QByteArray for later use because once QFile::readAll()
-        // done, all the data gets flushed and QFile::readAll()
-        // returns nothing when called later.
-        QFile routeFile( filename );
-        QByteArray kml;
+//        // All data from the KML file has to be transferred into a
+//        // QByteArray for later use because once QFile::readAll()
+//        // done, all the data gets flushed and QFile::readAll()
+//        // returns nothing when called later.
+//        QFile routeFile( filename );
+//        QByteArray kml;
 
-        if ( routeFile.open( QFile::ReadOnly ) ) {
-            kml = routeFile.readAll();
-            routeFile.close();
-        }
+//        if ( routeFile.open( QFile::ReadOnly ) ) {
+//            kml = routeFile.readAll();
+//            routeFile.close();
+//        }
 
-        // A QBuffer which uses the QByteArray "kml" needs to be
-        // created for RouteParser::read().
-        QBuffer buffer( &kml );
-        buffer.open( QBuffer::ReadOnly );
+//        // A QBuffer which uses the QByteArray "kml" needs to be
+//        // created for RouteParser::read().
+//        QBuffer buffer( &kml );
+//        buffer.open( QBuffer::ReadOnly );
 
-        RouteParser parser;
-        parser.read( &buffer );
-        buffer.close();
+//        RouteParser parser;
+//        parser.read( &buffer );
+//        buffer.close();
         
-        QString routeName;
-        GeoDocument *geoDoc = parser.releaseDocument();
-        GeoDataDocument *container = dynamic_cast<GeoDataDocument*>( geoDoc );
-        if ( container && container->size() > 0 ) {
-            GeoDataFolder *folder = container->folderList().at( 0 );
-            foreach ( GeoDataPlacemark *placemark, folder->placemarkList() ) {
-                routeName.append( placemark->name() );
-                routeName.append( " - " );
-            }
-        }
+//        QString routeName;
+//        GeoDocument *geoDoc = parser.releaseDocument();
+//        GeoDataDocument *container = dynamic_cast<GeoDataDocument*>( geoDoc );
+//        if ( container && container->size() > 0 ) {
+//            GeoDataFolder *folder = container->folderList().at( 0 );
+//            foreach ( GeoDataPlacemark *placemark, folder->placemarkList() ) {
+//                routeName.append( placemark->name() );
+//                routeName.append( " - " );
+//            }
+//        }
         
-        QUrl parameters;
-        parameters.addQueryItem( "timestamp", timestamp );
-        parameters.addQueryItem( "kml", QString::fromUtf8( kml ) );
-        parameters.addQueryItem( "name", routeName.left( routeName.length() - 3 ) );
-        parameters.addQueryItem( "distance", 0 );
-        parameters.addQueryItem( "duration", 0 );
-        QByteArray encodedQuery = parameters.encodedQuery();
+//        QUrl parameters;
+//        parameters.addQueryItem( "timestamp", timestamp );
+//        parameters.addQueryItem( "kml", QString::fromUtf8( kml ) );
+//        parameters.addQueryItem( "name", routeName.left( routeName.length() - 3 ) );
+//        parameters.addQueryItem( "distance", 0 );
+//        parameters.addQueryItem( "duration", 0 );
+//        QByteArray encodedQuery = parameters.encodedQuery();
         
-        syncBackend->uploadRoute( encodedQuery );
-        connect( syncBackend, SIGNAL(routeUploadProgress(qint64,qint64)), this, SLOT(updateUploadProgressbar(qint64,qint64)) );
-        //connect( d->m_uploadProgressDialog, SIGNAL(canceled()), syncBackend, SLOT(cancelUpload()) );
-        d->m_uploadProgressDialog->exec();
-    }
+//        syncBackend->uploadRoute( encodedQuery );
+//        connect( syncBackend, SIGNAL(routeUploadProgress(qint64,qint64)), this, SLOT(updateUploadProgressbar(qint64,qint64)) );
+//        //connect( d->m_uploadProgressDialog, SIGNAL(canceled()), syncBackend, SLOT(cancelUpload()) );
+//        d->m_uploadProgressDialog->exec();
+//    }
 }
 
 void RouteSyncManager::downloadRouteList()

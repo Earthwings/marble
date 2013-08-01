@@ -49,6 +49,7 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
 {
     if ( index.isValid() && index.row() >= 0 && index.row() < d->m_items.size() ) {
         switch( role ) {
+        case Qt::DecorationRole: return d->m_items.at( index.row() ).preview();
         case Timestamp: return d->m_items.at( index.row() ).timestamp();
         case Name: return d->m_items.at( index.row() ).name();
         case Distance: return d->m_items.at( index.row() ).distance();

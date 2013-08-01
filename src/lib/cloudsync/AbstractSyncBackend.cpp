@@ -38,7 +38,7 @@ QUrl AbstractSyncBackend::endpointUrl( const QString &endpoint )
     return QUrl( endpointUrl );
 }
 
-QUrl AbstractSyncBackend::endpointUrl( const QString &endpoint, QString &parameter )
+QUrl AbstractSyncBackend::endpointUrl( const QString &endpoint, const QString &parameter )
 {
     QString endpointUrl = QString( "%0/%1/%2" ).arg( d->m_apiUrl.toString() ).arg( endpoint ).arg( parameter );
     return QUrl( endpointUrl );

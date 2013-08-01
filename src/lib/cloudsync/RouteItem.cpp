@@ -17,6 +17,7 @@ class RouteItem::Private {
 public:
     QString m_timestamp;
     QString m_name;
+    QIcon m_preview;
     QString m_distance;
     QString m_duration;
 };
@@ -52,6 +53,16 @@ QString RouteItem::name() const
 void RouteItem::setName( const QString &name )
 {
     d->m_name = name;
+}
+
+QIcon RouteItem::preview() const
+{
+    return d->m_preview;
+}
+
+void RouteItem::setPreview( const QIcon &preview )
+{
+    d->m_preview = preview;
 }
 
 QString RouteItem::distance() const

@@ -11,6 +11,7 @@
 #ifndef ROUTEITEM_H
 #define ROUTEITEM_H
 
+#include <QIcon>
 #include <QString>
 
 namespace Marble {
@@ -28,6 +29,9 @@ public:
 
     QString name() const;
     void setName( const QString &name );
+
+    QIcon preview() const;
+    void setPreview(const QIcon &preview );
 
     QString distance() const;
     void setDistance( const QString &distance );

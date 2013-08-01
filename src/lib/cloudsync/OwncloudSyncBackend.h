@@ -19,6 +19,8 @@
 
 namespace Marble {
 
+class RouteParser;
+
 class OwncloudSyncBackend : public AbstractSyncBackend
 {
     Q_OBJECT
@@ -27,10 +29,13 @@ public:
     explicit OwncloudSyncBackend( QUrl apiUrl );
     ~OwncloudSyncBackend();
 
-    void uploadRoute( QByteArray encodedQuery );
+    void uploadRoute( const QString &timestamp );
     void downloadRouteList();
-    void downloadRoute( QString timestamp );
-    void deleteRoute( QString timestamp );
+    void downloadRoute( const QString &timestamp );
+    void deleteRoute( const QString &timestamp );
+    QPixmap createPreview( const QString &timestamp );
+    QString routeName( const QString &timestamp );
+    void downloadPreviews();
 
 public slots:
     void cancelUpload();
@@ -38,9 +43,10 @@ public slots:
 private slots:
     void prepareRouteList();
     void saveDownloadedRoute();
+    void savePreview();
 
 signals:
-    void routeListDownloaded( QVector<RouteItem> rawRouteList );
+    void routeListDownloaded( QVector<RouteItem> routeList );
     void routeDownloaded( QString rawRoute, QString timestamp );
     void routeDeleted();
     void routeUploadProgress( qint64 sent, qint64 total );

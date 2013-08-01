@@ -17,7 +17,6 @@
 
 namespace Marble {
 
-class RouteParser;
 class CloudSyncManager;
 
 class RouteSyncManager : public QObject
