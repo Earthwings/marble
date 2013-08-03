@@ -129,7 +129,7 @@ bool RouteItemDelegate::editorEvent( QEvent* event, QAbstractItemModel* model, c
             
             if ( downloadRect.contains( pos ) ) {
                 QString timestamp = index.data( CloudRouteModel::Timestamp ).toString();
-                m_model->setCurrentlyDownloading( index );
+                m_model->setDownloading( index );
                 emit downloadButtonClicked( timestamp );
                 return true;
             }

@@ -695,6 +695,8 @@ void MarbleModel::setWorkOffline( bool workOffline )
 {
     if ( d->m_workOffline != workOffline ) {
         downloadManager()->setDownloadEnabled( !workOffline );
+        cloudSyncManager()->setOfflineMode( workOffline );
+
         d->m_workOffline = workOffline;
         emit workOfflineChanged();
     }

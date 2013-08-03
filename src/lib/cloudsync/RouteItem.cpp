@@ -28,6 +28,7 @@ RouteItem::RouteItem() : d( new Private )
 
 RouteItem::~RouteItem()
 {
+//    delete d;
 }
 
 bool RouteItem::operator==( const RouteItem& other ) const

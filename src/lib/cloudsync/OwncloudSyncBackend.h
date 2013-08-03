@@ -16,10 +16,9 @@
 
 #include <QUrl>
 #include <QVector>
+#include <QNetworkReply>
 
 namespace Marble {
-
-class RouteParser;
 
 class OwncloudSyncBackend : public AbstractSyncBackend
 {
@@ -43,7 +42,8 @@ public slots:
 private slots:
     void prepareRouteList();
     void saveDownloadedRoute();
-    void savePreview();
+    void saveDownloadedPreview();
+    void setRouteListPreviews();
 
 signals:
     void routeListDownloaded( QVector<RouteItem> routeList );

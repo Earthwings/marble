@@ -28,7 +28,7 @@ public:
 
     QVector<RouteItem> m_items;
     QString m_cacheDir;
-    QModelIndex m_currentlyDownloading;
+    QPersistentModelIndex m_currentlyDownloading;
     qint64 m_totalDownloadSize;
     qint64 m_downloadedSize;
 };
@@ -85,16 +85,15 @@ bool CloudRouteModel::isCached( const QModelIndex &index ) const
 void CloudRouteModel::removeFromCache( const QModelIndex index )
 {
     QString timestamp = index.data( Timestamp ).toString();
-    QString filename = timestamp + ".kml";
-    QFile file( d->m_cacheDir + filename );
-    bool fileRemoved = file.remove();
-    if ( !fileRemoved ) {
-        mDebug() << "Failed to remove locally cached route file " << filename <<
+    bool fileRemoved = QFile( d->m_cacheDir + timestamp + ".kml" ).remove();
+    bool previewRemoved = QFile( d->m_cacheDir + "preview/" + timestamp + ".jpg" ).remove();
+    if ( !fileRemoved || !previewRemoved ) {
+        mDebug() << "Failed to remove locally cached route " << timestamp <<
                     ". It might have been removed already, or its directory is missing / not writable.";
     }
 }
 
-void CloudRouteModel::setCurrentlyDownloading( const QModelIndex index )
+void CloudRouteModel::setDownloading( const QPersistentModelIndex index )
 {
     d->m_currentlyDownloading = index;
 }

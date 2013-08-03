@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="labelNoRoute">
      <property name="text">
-      <string>No routes available on the cloud.</string>
+      <string>No route available.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

@@ -64,7 +64,7 @@ public:
      * Marks the route at given index as being downloaded.
      * @param index Index of the route.
      */
-    void setCurrentlyDownloading( const QModelIndex index );
+    void setDownloading( const QPersistentModelIndex index );
 
     /**
      * Checks if route is being downloaded.

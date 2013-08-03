@@ -20,21 +20,24 @@ public:
 
     RouteSyncManager *m_routeSyncManager;
 
+    bool m_offlineMode;
+
     bool m_syncEnabled;
     bool m_routeSyncEnabled;
 
-    QString m_server;
-    QString m_username;
-    QString m_password;
+    QString m_ownloudServer;
+    QString m_owncloudUsername;
+    QString m_owncloudPassword;
 };
 
 CloudSyncManager::Private::Private() :
     m_routeSyncManager(),
+    m_offlineMode( false ),
     m_syncEnabled( false ),
     m_routeSyncEnabled( false ),
-    m_server(),
-    m_username(),
-    m_password()
+    m_ownloudServer(),
+    m_owncloudUsername(),
+    m_owncloudPassword()
 {
 }
 
@@ -51,6 +54,16 @@ RouteSyncManager* CloudSyncManager::routeSyncManager()
 void CloudSyncManager::initializeRouteSyncManager( RoutingManager *routingManager )
 {
     d->m_routeSyncManager = new RouteSyncManager( this, routingManager );
+}
+
+bool CloudSyncManager::offlineMode()
+{
+    return d->m_offlineMode;
+}
+
+void CloudSyncManager::setOfflineMode( const bool &offline )
+{
+    d->m_offlineMode = offline;
 }
 
 CloudSyncManager::Backend CloudSyncManager::backend()
@@ -70,17 +83,17 @@ bool CloudSyncManager::isRouteSyncEnabled()
 
 QString CloudSyncManager::server()
 {
-    return d->m_server;
+    return d->m_ownloudServer;
 }
 
 QString CloudSyncManager::username()
 {
-    return d->m_username;
+    return d->m_owncloudUsername;
 }
 
 QString CloudSyncManager::password()
 {
-    return d->m_password;
+    return d->m_owncloudPassword;
 }
 
 void CloudSyncManager::setSyncEnabled( const bool &enabled )
@@ -95,17 +108,17 @@ void CloudSyncManager::setRouteSyncEnabled( const bool &enabled )
 
 void CloudSyncManager::setOwncloudServer( const QString &server )
 {
-    d->m_server = server;
+    d->m_ownloudServer = server;
 }
 
 void CloudSyncManager::setOwncloudUsername( const QString &username )
 {
-    d->m_username = username;
+    d->m_owncloudUsername = username;
 }
 
 void CloudSyncManager::setOwncloudPassword( const QString &password )
 {
-    d->m_password = password;
+    d->m_owncloudPassword = password;
 }
 
 QString CloudSyncManager::apiPath()

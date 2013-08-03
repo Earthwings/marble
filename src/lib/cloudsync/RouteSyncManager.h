@@ -27,6 +27,12 @@ public:
     RouteSyncManager( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager );
 
     /**
+     * Returns CloudRouteModel associated with RouteSyncManager instance
+     * @return CloudRouteModel associated with RouteSyncManager instance
+     */
+    CloudRouteModel *model();
+
+    /**
      * Generates a timestamp which will be used as an unique identifier.
      * @return A timestamp.
      */
@@ -46,7 +52,11 @@ public:
      */
     void uploadRoute();
 
-    CloudRouteModel *model();
+    /**
+     * Gathers data from local cache directory and returns a route list.
+     * @return Routes stored in local cache
+     */
+    QVector<RouteItem> cachedRouteList();
 
 public slots:
     /**
@@ -56,11 +66,9 @@ public slots:
     void downloadRouteList();
 
     /**
-     * Opens a CloudRoutesDialog.
-     * @param rawRouteList A route list, ready to be parsed.
+     * Forwards the route list to CloudRouteModel
+     * @param routeList Downloaded route list
      */
-    //void openCloudRoutesDialog( QVector<RouteItem> routes );
-
     void processRouteList( QVector<RouteItem> routeList );
 
     /**
@@ -97,10 +105,6 @@ public slots:
     void updateListDownloadProgressbar( qint64 received, qint64 total );
 
 signals:
-    /**
-     * Emitted when route list ready to use.
-     */
-    void routeListReady();
     void routeDownloadProgress( qint64 received, qint64 total );
     void routeListDownloadProgress( qint64 received, qint64 total );
 

@@ -17,18 +17,16 @@
 #include "RenderPlugin.h"
 #include "RoutingModel.h"
 #include "RoutingManager.h"
-#include "GeoParser.h"
 #include "GeoDocument.h"
 #include "GeoDataFolder.h"
 #include "GeoDataDocument.h"
 #include "GeoDataPlacemark.h"
-#include "KmlElementDictionary.h"
+#include "RouteParser.h"
 
 #include <QNetworkAccessManager>
 #include <QScriptValueIterator>
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
-#include <QNetworkReply>
 #include <QScriptEngine>
 #include <QFileInfo>
 #include <QBuffer>
@@ -38,32 +36,6 @@
 
 namespace Marble
 {
-
-/**
- * Class that overrides necessary methods of GeoParser.
- * @see GeoParser
- */
-class RouteParser : public GeoParser {
-public:
-    explicit RouteParser();
-    virtual GeoDataDocument* createDocument() const;
-    virtual bool isValidRootElement();
-};
-
-RouteParser::RouteParser() : GeoParser( 0 )
-{
-    // Nothing to do.
-}
-
-GeoDataDocument* RouteParser::createDocument() const
-{
-    return new GeoDataDocument;
-}
-
-bool RouteParser::isValidRootElement()
-{
-    return isValidElement(kml::kmlTag_kml);
-}
 
 class OwncloudSyncBackend::Private {
     
@@ -77,6 +49,7 @@ class OwncloudSyncBackend::Private {
         QNetworkReply *m_routeDownloadReply;
         QNetworkReply *m_routeDeleteReply;
         QNetworkReply *m_routePreviewReply;
+        QNetworkReply *m_routeListPreviewReply;
 
         QVector<RouteItem> m_routeList;
         int m_previewPosition;
@@ -94,6 +67,9 @@ OwncloudSyncBackend::Private::Private() :
     m_routeUploadReply(),
     m_routeListReply(),
     m_routeDownloadReply(),
+    m_routeDeleteReply(),
+    m_routePreviewReply(),
+    m_routeListPreviewReply(),
     m_routeList( QVector<RouteItem>() ),
     m_previewPosition( 0 ),
     // Route API endpoints
@@ -120,7 +96,7 @@ void OwncloudSyncBackend::uploadRoute( const QString &timestamp )
     QString word = "----MarbleCloudBoundary";
     QString boundary = QString( "--%0" ).arg( word );
     QNetworkRequest request( endpointUrl( d->m_routeUploadEndpoint ) );
-    request.setHeader( QNetworkRequest::ContentTypeHeader, QString( "multipart/form-data; boundary=" + word ) );
+    request.setHeader( QNetworkRequest::ContentTypeHeader, QString( "multipart/form-data; boundary=%0" ).arg( word ) );
 
     QByteArray data;
     data.append( QString( boundary + "\r\n" ).toUtf8() );
@@ -151,20 +127,25 @@ void OwncloudSyncBackend::uploadRoute( const QString &timestamp )
     data.append( QString( boundary + "\r\n" ).toUtf8() );
 
     // KML part
-    data.append( QString( "Content-Disposition: form-data; name=\"kml\"; filename=\"" + timestamp + ".kml\"" ).toUtf8() );
+    data.append( QString( "Content-Disposition: form-data; name=\"kml\"; filename=\"%0.kml\"" ).arg( timestamp ).toUtf8() );
     data.append( "\r\n" );
     data.append( "Content-Type: application/vnd.google-earth.kml+xml" );
     data.append( "\r\n\r\n" );
 
-    QFile kmlFile( d->m_cacheDir->absolutePath() + QString( "/%0.kml").arg( timestamp ) );
-    kmlFile.open( QFile::ReadOnly );
-    data.append( kmlFile.readAll() );
+    QFile kmlFile( d->m_cacheDir->absolutePath() + QString( "/%0.kml" ).arg( timestamp ) );
 
+    if( !kmlFile.open( QFile::ReadOnly ) ) {
+        mDebug() << "Could not open " + timestamp + ".kml. Either it has not been saved" +
+                    " to cache for upload or another application removed it from there.";
+        return;
+    }
+
+    data.append( kmlFile.readAll() );
     data.append( "\r\n" );
     data.append( QString( boundary + "\r\n" ).toUtf8() );
 
     // Preview part
-    data.append( QString( "Content-Disposition: form-data; name=\"preview\"; filename=\"" + timestamp + ".png\"" ).toUtf8() );
+    data.append( QString( "Content-Disposition: form-data; name=\"preview\"; filename=\"%0.png\"" ).arg( timestamp ).toUtf8() );
     data.append( "\r\n" );
     data.append( "Content-Type: image/png" );
     data.append( "\r\n\r\n" );
@@ -192,10 +173,14 @@ void OwncloudSyncBackend::downloadRouteList()
 
 void OwncloudSyncBackend::downloadRoute( const QString &timestamp )
 {
-    QNetworkRequest request( endpointUrl( d->m_routeDownloadEndpoint, timestamp ) );
-    d->m_routeDownloadReply = d->m_network->get( request );
+    QNetworkRequest routeRequest( endpointUrl( d->m_routeDownloadEndpoint, timestamp ) );
+    d->m_routeDownloadReply = d->m_network->get( routeRequest );
     connect( d->m_routeDownloadReply, SIGNAL(finished()), this, SLOT(saveDownloadedRoute()) );
     connect( d->m_routeDownloadReply, SIGNAL(downloadProgress(qint64,qint64)), this, SIGNAL(routeDownloadProgress(qint64,qint64)) );
+
+    QNetworkRequest previewRequest( endpointUrl(d->m_routePreviewEndpoint, timestamp ) );
+    d->m_routePreviewReply = d->m_network->get( previewRequest );
+    connect( d->m_routePreviewReply, SIGNAL(finished()), this, SLOT(setRouteListPreviews()) );
 }
 
 void OwncloudSyncBackend::deleteRoute( const QString &timestamp )
@@ -225,7 +210,10 @@ QPixmap OwncloudSyncBackend::createPreview( const QString &timestamp )
         mapWidget->centerOn( bbox );
     }
 
-    return QPixmap::grabWidget( mapWidget );
+    QPixmap pixmap = QPixmap::grabWidget( mapWidget );
+    QDir( d->m_cacheDir->absolutePath() ).mkpath( "preview" );
+    pixmap.save( d->m_cacheDir->absolutePath() + "/preview/" + timestamp + ".jpg" );
+    return pixmap;
 }
 
 QString OwncloudSyncBackend::routeName( const QString &timestamp )
@@ -234,7 +222,11 @@ QString OwncloudSyncBackend::routeName( const QString &timestamp )
     file.open( QFile::ReadOnly );
 
     RouteParser parser;
-    parser.read( &file );
+    if( !parser.read( &file ) ) {
+        mDebug() << "Could not read " + timestamp + ".kml. Timestamp will be used as "
+                    + "route name because of the problem";
+        return timestamp;
+    }
     file.close();
 
     QString routeName;
@@ -260,8 +252,8 @@ void OwncloudSyncBackend::downloadPreviews()
         }
 
         QNetworkRequest request( endpointUrl( d->m_routePreviewEndpoint, d->m_routeList.at( d->m_previewPosition ).timestamp() ) );
-        d->m_routePreviewReply = d->m_network->get( request );
-        connect( d->m_routePreviewReply, SIGNAL(finished()), SLOT(savePreview()) );
+        d->m_routeListPreviewReply = d->m_network->get( request );
+        connect( d->m_routeListPreviewReply, SIGNAL(finished()), SLOT(setRouteListPreviews()) );
     } else {
         emit routeListDownloaded( d->m_routeList );
     }
@@ -324,9 +316,18 @@ void OwncloudSyncBackend::saveDownloadedRoute()
     file.close();
 }
 
-void OwncloudSyncBackend::savePreview()
+void OwncloudSyncBackend::saveDownloadedPreview()
 {
     const QImage image = QImage::fromData( d->m_routePreviewReply->readAll() );
+    const QPixmap pixmap = QPixmap::fromImage( image );
+    QString timestamp = QFileInfo( d->m_routeDownloadReply->url().toString() ).fileName();
+    pixmap.save( d->m_cacheDir->absolutePath() + "/preview/" + timestamp + ".jpg" );
+}
+
+void OwncloudSyncBackend::setRouteListPreviews()
+{
+    qDebug() << d->m_routeListPreviewReply->url();
+    const QImage image = QImage::fromData( d->m_routeListPreviewReply->readAll() );
     const QPixmap pixmap = QPixmap::fromImage( image );
     const QIcon previewIcon( pixmap );
 

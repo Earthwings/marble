@@ -30,6 +30,18 @@ public:
     RouteSyncManager* routeSyncManager();
     void initializeRouteSyncManager(  RoutingManager *routingManager );
 
+    /**
+     * Getter for offine mode.
+     * @return true if offline mode enabled
+     */
+    bool offlineMode();
+
+    /**
+     * Setter for offine mode.
+     * @param offline Status of offline mode
+     */
+    void setOfflineMode( bool offline );
+
     enum Backend {
         Owncloud
     };
