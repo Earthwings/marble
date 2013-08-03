@@ -304,12 +304,7 @@ void OwncloudSyncBackend::prepareRouteList()
 
 void OwncloudSyncBackend::saveDownloadedRoute()
 {
-    QString result = d->m_routeDownloadReply->readAll();
     QString timestamp = QFileInfo( d->m_routeDownloadReply->url().toString() ).fileName();
-    
-    QScriptEngine engine;
-    QScriptValue response = engine.evaluate( QString( "(%0)" ).arg( result ) );
-    QScriptValue kml = response.property( "data" );
     
     bool pathCreated = d->m_cacheDir->mkpath( d->m_cacheDir->absolutePath() );
     if ( !pathCreated ) {
@@ -325,7 +320,7 @@ void OwncloudSyncBackend::saveDownloadedRoute()
                  <<  " for writing. Its directory either is missing or is not writable.";
     }
 
-    file.write( kml.toString().toUtf8() );
+    file.write( d->m_routeDownloadReply->readAll() );
     file.close();
 }
 
