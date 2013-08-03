@@ -61,7 +61,7 @@ bool CloudSyncManager::offlineMode()
     return d->m_offlineMode;
 }
 
-void CloudSyncManager::setOfflineMode( const bool &offline )
+void CloudSyncManager::setOfflineMode( bool offline )
 {
     d->m_offlineMode = offline;
 }

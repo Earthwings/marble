@@ -180,7 +180,7 @@ void OwncloudSyncBackend::downloadRoute( const QString &timestamp )
 
     QNetworkRequest previewRequest( endpointUrl(d->m_routePreviewEndpoint, timestamp ) );
     d->m_routePreviewReply = d->m_network->get( previewRequest );
-    connect( d->m_routePreviewReply, SIGNAL(finished()), this, SLOT(setRouteListPreviews()) );
+    connect( d->m_routePreviewReply, SIGNAL(finished()), this, SLOT(saveDownloadedPreview()) );
 }
 
 void OwncloudSyncBackend::deleteRoute( const QString &timestamp )
@@ -271,6 +271,8 @@ void OwncloudSyncBackend::prepareRouteList()
     QScriptEngine engine;
     QScriptValue response = engine.evaluate( QString( "(%0)" ).arg( result ) );
     QScriptValue routes = response.property( "data" );
+
+    d->m_routeList.clear();
     
     if( routes.isArray() ) {
         QScriptValueIterator iterator( routes );
@@ -326,7 +328,6 @@ void OwncloudSyncBackend::saveDownloadedPreview()
 
 void OwncloudSyncBackend::setRouteListPreviews()
 {
-    qDebug() << d->m_routeListPreviewReply->url();
     const QImage image = QImage::fromData( d->m_routeListPreviewReply->readAll() );
     const QPixmap pixmap = QPixmap::fromImage( image );
     const QIcon previewIcon( pixmap );
