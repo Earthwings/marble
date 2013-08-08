@@ -48,11 +48,8 @@ class OwncloudSyncBackend::Private {
         QNetworkReply *m_routeListReply;
         QNetworkReply *m_routeDownloadReply;
         QNetworkReply *m_routeDeleteReply;
-        QNetworkReply *m_routePreviewReply;
-        QNetworkReply *m_routeListPreviewReply;
 
         QVector<RouteItem> m_routeList;
-        int m_previewPosition;
 
         QString m_routeUploadEndpoint;
         QString m_routeListEndpoint;
@@ -68,10 +65,7 @@ OwncloudSyncBackend::Private::Private() :
     m_routeListReply(),
     m_routeDownloadReply(),
     m_routeDeleteReply(),
-    m_routePreviewReply(),
-    m_routeListPreviewReply(),
     m_routeList( QVector<RouteItem>() ),
-    m_previewPosition( 0 ),
     // Route API endpoints
     m_routeUploadEndpoint( "routes/create" ),
     m_routeListEndpoint( "routes" ),
@@ -177,10 +171,6 @@ void OwncloudSyncBackend::downloadRoute( const QString &timestamp )
     d->m_routeDownloadReply = d->m_network->get( routeRequest );
     connect( d->m_routeDownloadReply, SIGNAL(finished()), this, SLOT(saveDownloadedRoute()) );
     connect( d->m_routeDownloadReply, SIGNAL(downloadProgress(qint64,qint64)), this, SIGNAL(routeDownloadProgress(qint64,qint64)) );
-
-    QNetworkRequest previewRequest( endpointUrl(d->m_routePreviewEndpoint, timestamp ) );
-    d->m_routePreviewReply = d->m_network->get( previewRequest );
-    connect( d->m_routePreviewReply, SIGNAL(finished()), this, SLOT(saveDownloadedPreview()) );
 }
 
 void OwncloudSyncBackend::deleteRoute( const QString &timestamp )
@@ -243,22 +233,6 @@ QString OwncloudSyncBackend::routeName( const QString &timestamp )
     return routeName.left( routeName.length() - 3 );
 }
 
-void OwncloudSyncBackend::downloadPreviews()
-{
-    if( d->m_routeList.count() != 0 ) {
-        if( d->m_previewPosition == d->m_routeList.count() ) {
-            emit routeListDownloaded( d->m_routeList );
-            return;
-        }
-
-        QNetworkRequest request( endpointUrl( d->m_routePreviewEndpoint, d->m_routeList.at( d->m_previewPosition ).timestamp() ) );
-        d->m_routeListPreviewReply = d->m_network->get( request );
-        connect( d->m_routeListPreviewReply, SIGNAL(finished()), SLOT(setRouteListPreviews()) );
-    } else {
-        emit routeListDownloaded( d->m_routeList );
-    }
-}
-
 void OwncloudSyncBackend::cancelUpload()
 {
     d->m_routeUploadReply->abort();
@@ -285,6 +259,7 @@ void OwncloudSyncBackend::prepareRouteList()
             route.setName ( iterator.value().property( "name" ).toString() );
             route.setDistance( iterator.value().property( "distance" ).toString() );
             route.setDuration( iterator.value().property( "duration" ).toString() );
+            route.setPreviewUrl( endpointUrl( d->m_routePreviewEndpoint, route.timestamp() ) );
             
             d->m_routeList.append( route );
         }
@@ -293,7 +268,7 @@ void OwncloudSyncBackend::prepareRouteList()
     // FIXME Find why an empty item added to the end.
     if( !d->m_routeList.isEmpty() ) { d->m_routeList.remove( d->m_routeList.count() - 1 ); }
 
-    downloadPreviews();
+    emit routeListDownloaded( d->m_routeList );
 }
 
 void OwncloudSyncBackend::saveDownloadedRoute()
@@ -306,37 +281,31 @@ void OwncloudSyncBackend::saveDownloadedRoute()
                     ". Check if your user has sufficent permissions for this operation.";
     }
     
-    QFile file( d->m_cacheDir->absolutePath() + QString( "/%0.kml").arg( timestamp ) );
-    
-    bool fileOpened = file.open( QFile::ReadWrite );
+    QString kmlFilePath = QString( "%0/%1.kml").arg( d->m_cacheDir->absolutePath(), timestamp );
+    QFile kmlFile( kmlFilePath );
+    bool fileOpened = kmlFile.open( QFile::ReadWrite );
+
     if ( !fileOpened ) {
-        mDebug() << "Failed to open file" << d->m_cacheDir->absolutePath() + QString( "/%0.kml").arg( timestamp )
-                 <<  " for writing. Its directory either is missing or is not writable.";
+        mDebug() << "Failed to open file" << kmlFilePath << " for writing."
+                 <<  " Its directory either is missing or is not writable.";
     }
 
-    file.write( d->m_routeDownloadReply->readAll() );
-    file.close();
-}
+    kmlFile.write( d->m_routeDownloadReply->readAll() );
+    kmlFile.close();
 
-void OwncloudSyncBackend::saveDownloadedPreview()
-{
-    const QImage image = QImage::fromData( d->m_routePreviewReply->readAll() );
-    const QPixmap pixmap = QPixmap::fromImage( image );
-    QString timestamp = QFileInfo( d->m_routeDownloadReply->url().toString() ).fileName();
-    pixmap.save( d->m_cacheDir->absolutePath() + "/preview/" + timestamp + ".jpg" );
-}
+    QString previewFilePath = QString( "%0/preview/%1.jpg").arg( d->m_cacheDir->absolutePath(), timestamp );
+    QFile previewFile( previewFilePath );
+    bool previewFileOpened = previewFile.open( QFile::ReadWrite );
 
-void OwncloudSyncBackend::setRouteListPreviews()
-{
-    const QImage image = QImage::fromData( d->m_routeListPreviewReply->readAll() );
-    const QPixmap pixmap = QPixmap::fromImage( image );
-    const QIcon previewIcon( pixmap );
+    if ( !previewFileOpened ) {
+        mDebug() << "Failed to open file" << previewFilePath << "for writing."
+                 <<  " Its directory either is missing or is not writable.";
+    }
 
-    RouteItem *route = &( d->m_routeList[ d->m_previewPosition ] );
-    route->setPreview( previewIcon );
-
-    d->m_previewPosition++;
-    downloadPreviews();
+    previewFile.open( QFile::ReadWrite );
+    QPixmap preview = createPreview( timestamp );
+    preview.save( &previewFile, "JPG" );
+    previewFile.close();
 }
 
 }

@@ -34,7 +34,6 @@ public:
     void deleteRoute( const QString &timestamp );
     QPixmap createPreview( const QString &timestamp );
     QString routeName( const QString &timestamp );
-    void downloadPreviews();
 
 public slots:
     void cancelUpload();
@@ -42,8 +41,6 @@ public slots:
 private slots:
     void prepareRouteList();
     void saveDownloadedRoute();
-    void saveDownloadedPreview();
-    void setRouteListPreviews();
 
 signals:
     void routeListDownloaded( QVector<RouteItem> routeList );

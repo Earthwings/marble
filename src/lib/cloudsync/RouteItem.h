@@ -11,6 +11,7 @@
 #ifndef ROUTEITEM_H
 #define ROUTEITEM_H
 
+#include <QUrl>
 #include <QIcon>
 #include <QString>
 
@@ -32,6 +33,9 @@ public:
 
     QIcon preview() const;
     void setPreview(const QIcon &preview );
+
+    QUrl previewUrl() const;
+    void setPreviewUrl( const QUrl &previewUrl );
 
     QString distance() const;
     void setDistance( const QString &distance );

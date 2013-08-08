@@ -14,6 +14,7 @@
 #include "RouteItem.h"
 
 #include <QModelIndex>
+#include <QNetworkReply>
 #include <QAbstractListModel>
 
 namespace Marble
@@ -27,7 +28,7 @@ public:
     enum RouteRoles {
         Timestamp = Qt::UserRole + 1,
         Name,
-        Preview,
+        PreviewUrl,
         Distance,
         Duration,
         IsCached,
@@ -52,29 +53,32 @@ public:
      * @param index Index of the route.
      * @return true, if exists.
      */
-    bool isCached( const QModelIndex& index ) const;
+    bool isCached( const QModelIndex &index ) const;
 
     /**
      * Removes route with given index from local cache.
      * @param index Index of the route.
      */
-    void removeFromCache( const QModelIndex index );
+    void removeFromCache( const QModelIndex &index );
 
     /**
      * Marks the route at given index as being downloaded.
      * @param index Index of the route.
      */
-    void setDownloading( const QPersistentModelIndex index );
+    void setDownloading( const QPersistentModelIndex &index );
 
     /**
      * Checks if route is being downloaded.
      * @param index Index of the route.
      * @return true, if downloading.
      */
-    bool isDownloading( const QModelIndex index ) const;
+    bool isDownloading( const QModelIndex &index ) const;
+
+    QIcon preview( const QModelIndex &index ) const;
 
 public slots:
     void updateProgress( qint64 currentSize, qint64 totalSize );
+    void setPreview( QNetworkReply *reply );
 
 private:
     class Private;

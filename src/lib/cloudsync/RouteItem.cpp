@@ -18,6 +18,7 @@ public:
     QString m_timestamp;
     QString m_name;
     QIcon m_preview;
+    QUrl m_previewUrl;
     QString m_distance;
     QString m_duration;
 };
@@ -64,6 +65,16 @@ QIcon RouteItem::preview() const
 void RouteItem::setPreview( const QIcon &preview )
 {
     d->m_preview = preview;
+}
+
+QUrl RouteItem::previewUrl() const
+{
+    return d->m_previewUrl;
+}
+
+void RouteItem::setPreviewUrl( const QUrl &previewUrl )
+{
+    d->m_previewUrl = previewUrl;
 }
 
 QString RouteItem::distance() const
