@@ -25,6 +25,7 @@ class RouteSyncManager : public QObject
     
 public:
     RouteSyncManager( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager );
+    ~RouteSyncManager();
 
     /**
      * Returns CloudRouteModel associated with RouteSyncManager instance
@@ -96,13 +97,6 @@ public slots:
      * @param total Total bytes.
      */
     void updateUploadProgressbar( qint64 sent, qint64 total );
-
-    /**
-     * Updates route list downlod progressbar.
-     * @param received Bytes received.
-     * @param total Total bytes.
-     */
-    void updateListDownloadProgressbar( qint64 received, qint64 total );
 
 signals:
     void routeDownloadProgress( qint64 received, qint64 total );

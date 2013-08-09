@@ -44,7 +44,6 @@ class RouteSyncManager::Private {
 public:
     Private( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager );
 
-    QProgressDialog *m_listDownloadProgressDialog;
     QProgressDialog *m_uploadProgressDialog;
     CloudSyncManager *m_cloudSyncManager;
     RoutingManager *m_routingManager;
@@ -55,7 +54,6 @@ public:
 };
 
 RouteSyncManager::Private::Private( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager ) :
-    m_listDownloadProgressDialog( new QProgressDialog() ),
     m_uploadProgressDialog( new QProgressDialog() ),
     m_cloudSyncManager( cloudSyncManager ),
     m_routingManager( routingManager ),
@@ -67,15 +65,16 @@ RouteSyncManager::Private::Private( CloudSyncManager *cloudSyncManager, RoutingM
     m_uploadProgressDialog->setMinimum( 0 );
     m_uploadProgressDialog->setMaximum( 100 );
     m_uploadProgressDialog->setWindowTitle( tr( "Uploading route..." ) );
-    
-    m_listDownloadProgressDialog->setMinimum( 0 );
-    m_listDownloadProgressDialog->setMaximum( 100 );
-    m_listDownloadProgressDialog->setWindowTitle( tr( "Downloading route list..." ) );
 }
 
 RouteSyncManager::RouteSyncManager( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager ) :
     d( new Private( cloudSyncManager, routingManager ) )
 {
+}
+
+RouteSyncManager::~RouteSyncManager()
+{
+    delete d;
 }
 
 CloudRouteModel* RouteSyncManager::model()
@@ -212,17 +211,6 @@ void RouteSyncManager::updateUploadProgressbar( qint64 sent, qint64 total )
     if( sent == total ) {
         d->m_uploadProgressDialog->accept();
         disconnect( this, SLOT(updateUploadProgressbar(qint64,qint64)) );
-    }
-}
-
-void RouteSyncManager::updateListDownloadProgressbar(qint64 received, qint64 total)
-{
-    qint64 percentage = qRound( 100.0 * qreal( received ) / total );
-    d->m_listDownloadProgressDialog->setValue( percentage );
-    
-    if( received == total ) {
-        d->m_listDownloadProgressDialog->accept();
-        disconnect( this, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
     }
 }
 
