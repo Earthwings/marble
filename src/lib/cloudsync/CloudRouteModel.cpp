@@ -119,6 +119,7 @@ void CloudRouteModel::setPreview( QNetworkReply *reply )
     RouteItem route = d->m_previewQueue.take( reply );
     QIcon icon( QPixmap::fromImage( QImage::fromData( reply->readAll() ) ) );
     route.setPreview( icon );
+    d->m_requestedPreviews.remove( route.timestamp() );
 }
 
 void CloudRouteModel::updateProgress( qint64 currentSize, qint64 totalSize )
