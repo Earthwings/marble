@@ -32,9 +32,7 @@ public:
         Distance,
         Duration,
         IsCached,
-        IsDownloading,
-        TotalSize,
-        DownloadedSize
+        IsDownloading
     };
 
     explicit CloudRouteModel( QObject *parent = 0 );
@@ -56,10 +54,16 @@ public:
     bool isCached( const QModelIndex &index ) const;
 
     /**
+     * Getter for the item currently being downloaded.
+     * @return Model for the item currently being downloaded
+     */
+    QPersistentModelIndex downloadingItem();
+
+    /**
      * Marks the route at given index as being downloaded.
      * @param index Index of the route.
      */
-    void setDownloading( const QPersistentModelIndex &index );
+    void setDownloadingItem( const QPersistentModelIndex &index );
 
     /**
      * Checks if route is being downloaded.
@@ -68,6 +72,24 @@ public:
      */
     bool isDownloading( const QModelIndex &index ) const;
 
+    /**
+     * Total size of the item currently being downloaded.
+     * @return Total size of the item, -1 if no route is being downloaded
+     */
+    qint64 totalSize();
+
+    /**
+     * Returns how much of the route are downloaded as bytes
+     * @return Downloaded bytes
+     */
+    qint64 downloadedSize();
+
+    /**
+     * Checks whether a preview for the route available and
+     * returns or downloads the preview
+     * @param index Index of the item whose preview is requested
+     * @return Route's preview as QIcon
+     */
     QIcon preview( const QModelIndex &index ) const;
 
 public slots:

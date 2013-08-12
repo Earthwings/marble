@@ -53,8 +53,8 @@ void RouteItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& op
     bool downloading = index.data( CloudRouteModel::IsDownloading ).toBool();
     
     if ( downloading ) {
-        qint64 total = qVariantValue<qint64>( index.data( CloudRouteModel::TotalSize ) );
-        qint64 progress = qVariantValue<qint64>( index.data( CloudRouteModel::DownloadedSize ) );
+        qint64 total = m_model->totalSize();
+        qint64 progress = m_model->downloadedSize();
         
         QStyleOptionProgressBar progressBarOption;
         progressBarOption.rect = position( Progressbar, option );
@@ -130,7 +130,7 @@ bool RouteItemDelegate::editorEvent( QEvent* event, QAbstractItemModel* model, c
             
             if ( downloadRect.contains( pos ) ) {
                 QString timestamp = index.data( CloudRouteModel::Timestamp ).toString();
-                m_model->setDownloading( index );
+                m_model->setDownloadingItem( index );
                 emit downloadButtonClicked( timestamp );
                 return true;
             }

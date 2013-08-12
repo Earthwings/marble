@@ -29,8 +29,8 @@ public:
 
     QVector<RouteItem> m_items;
     QString m_cacheDir;
-    QPersistentModelIndex m_currentlyDownloading;
-    qint64 m_totalDownloadSize;
+    QPersistentModelIndex m_downloading;
+    qint64 m_totalSize;
     qint64 m_downloadedSize;
 
     QNetworkAccessManager m_network;
@@ -39,7 +39,7 @@ public:
 };
 
 CloudRouteModel::Private::Private() :
-    m_totalDownloadSize( -1 ),
+    m_totalSize( -1 ),
     m_downloadedSize( 0 )
 {
     m_cacheDir = MarbleDirs::localPath() + "/cloudsync/cache/routes/";
@@ -64,8 +64,6 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
         case Duration: return d->m_items.at( index.row() ).duration();
         case IsCached: return isCached( index );
         case IsDownloading: return isDownloading( index );
-        case TotalSize: return d->m_totalDownloadSize;
-        case DownloadedSize: return d->m_downloadedSize;
         }
     }
     
@@ -90,14 +88,29 @@ bool CloudRouteModel::isCached( const QModelIndex &index ) const
     return cacheDir.exists();
 }
 
-void CloudRouteModel::setDownloading(const QPersistentModelIndex &index )
+QPersistentModelIndex CloudRouteModel::downloadingItem()
 {
-    d->m_currentlyDownloading = index;
+    return d->m_downloading;
+}
+
+void CloudRouteModel::setDownloadingItem(const QPersistentModelIndex &index )
+{
+    d->m_downloading = index;
 }
 
 bool CloudRouteModel::isDownloading(const QModelIndex &index ) const
 {
-    return d->m_currentlyDownloading == index;
+    return d->m_downloading == index;
+}
+
+qint64 CloudRouteModel::totalSize()
+{
+    return d->m_totalSize;
+}
+
+qint64 CloudRouteModel::downloadedSize()
+{
+    return d->m_downloadedSize;
 }
 
 QIcon CloudRouteModel::preview( const QModelIndex &index ) const
@@ -124,12 +137,12 @@ void CloudRouteModel::setPreview( QNetworkReply *reply )
 
 void CloudRouteModel::updateProgress( qint64 currentSize, qint64 totalSize )
 {
-    d->m_totalDownloadSize = totalSize;
+    d->m_totalSize = totalSize;
     d->m_downloadedSize = currentSize;
-    dataChanged( d->m_currentlyDownloading, d->m_currentlyDownloading );
+    dataChanged( d->m_downloading, d->m_downloading );
     if( currentSize == totalSize ) {
-        d->m_currentlyDownloading = QModelIndex();
-        d->m_totalDownloadSize = -1;
+        d->m_downloading = QPersistentModelIndex();
+        d->m_totalSize = -1;
         d->m_downloadedSize = 0;
     }
 }
