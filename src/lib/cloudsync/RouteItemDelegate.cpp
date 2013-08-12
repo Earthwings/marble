@@ -114,13 +114,14 @@ bool RouteItemDelegate::editorEvent( QEvent* event, QAbstractItemModel* model, c
         if ( cached ) {
             QRect openRect = position( OpenButton, option );
             QRect cacheRemoveRect = position( RemoveFromCacheButton, option );
-            
+
             if ( openRect.contains( pos ) ) {
                 QString timestamp = index.data( CloudRouteModel::Timestamp ).toString();
                 emit openButtonClicked( timestamp );
                 return true;
             } else if ( cacheRemoveRect.contains( pos ) ) {
-                m_model->removeFromCache( index );
+                QString timestamp = index.data( CloudRouteModel::Timestamp ).toString();
+                emit removeFromCacheButtonClicked( timestamp );
                 return true;
             }
         } else {

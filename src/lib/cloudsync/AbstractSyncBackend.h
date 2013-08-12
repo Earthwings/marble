@@ -10,8 +10,10 @@
 
 #ifndef ABSTRACTSYNCBACKEND_H
 #define ABSTRACTSYNCBACKEND_H
-#include <QObject>
+
 #include <QUrl>
+#include <QDir>
+#include <QObject>
 
 namespace Marble {
 
@@ -25,6 +27,7 @@ public:
 
     QUrl endpointUrl( const QString &endpoint );
     QUrl endpointUrl( const QString &endpoint, const QString &parameter );
+    void removeFromCache( const QDir &cacheDir, const QString &timestamp );
 
 private:
     class Private;

@@ -179,7 +179,7 @@ void RouteSyncManager::processRouteList( QVector<RouteItem> routeList )
     d->m_model->setItems( routeList );
 }
 
-void RouteSyncManager::downloadRoute( QString timestamp )
+void RouteSyncManager::downloadRoute( const QString &timestamp )
 {
     if( d->m_cloudSyncManager->backend() == CloudSyncManager::Owncloud ) {
         connect( d->m_owncloudBackend, SIGNAL(routeDownloadProgress(qint64,qint64)),
@@ -188,18 +188,25 @@ void RouteSyncManager::downloadRoute( QString timestamp )
     }
 }
 
-void RouteSyncManager::openRoute( QString timestamp )
+void RouteSyncManager::openRoute(const QString &timestamp )
 {
     d->m_routingManager->loadRoute( QString( "%0/%1.kml" )
                                     .arg( d->m_cacheDir.absolutePath() )
                                     .arg( timestamp ) );
 }
 
-void RouteSyncManager::deleteRoute( QString timestamp )
+void RouteSyncManager::deleteRoute(const QString &timestamp )
 {
     if( d->m_cloudSyncManager->backend() == CloudSyncManager::Owncloud ) {
         connect( d->m_owncloudBackend, SIGNAL(routeDeleted()), this, SLOT(downloadRouteList()) );
         d->m_owncloudBackend->deleteRoute( timestamp );
+    }
+}
+
+void RouteSyncManager::removeRouteFromCache( const QString &timestamp )
+{
+    if( d->m_cloudSyncManager->backend() == CloudSyncManager::Owncloud ) {
+        d->m_owncloudBackend->removeFromCache( d->m_cacheDir, timestamp );
     }
 }
 

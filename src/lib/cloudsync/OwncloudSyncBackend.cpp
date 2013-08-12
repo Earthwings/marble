@@ -138,6 +138,8 @@ void OwncloudSyncBackend::uploadRoute( const QString &timestamp )
     data.append( "\r\n" );
     data.append( QString( boundary + "\r\n" ).toUtf8() );
 
+    kmlFile.close();
+
     // Preview part
     data.append( QString( "Content-Disposition: form-data; name=\"preview\"; filename=\"%0.png\"" ).arg( timestamp ).toUtf8() );
     data.append( "\r\n" );
@@ -302,7 +304,6 @@ void OwncloudSyncBackend::saveDownloadedRoute()
                  <<  " Its directory either is missing or is not writable.";
     }
 
-    previewFile.open( QFile::ReadWrite );
     QPixmap preview = createPreview( timestamp );
     preview.save( &previewFile, "JPG" );
     previewFile.close();

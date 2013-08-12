@@ -77,19 +77,25 @@ public slots:
      * @param timestamp Timestamp of the route that will be downloaded.
      * @see RouteSyncManager::saveDownloadedToCache()
      */
-    void downloadRoute( QString timestamp );
+    void downloadRoute( const QString &timestamp );
 
     /**
      * Opens route.
      * @param timestamp Timestamp of the route that will be opened.
      */
-    void openRoute( QString timestamp );
+    void openRoute( const QString &timestamp );
 
     /**
      * Deletes route from cloud.
      * @param timestamp Timestamp of the route that will be deleted.
      */
-    void deleteRoute( QString timestamp );
+    void deleteRoute( const QString &timestamp );
+
+    /**
+     * Removes route from cache.
+     * @param timestamp Timestamp of the route that will be removed.
+     */
+    void removeRouteFromCache( const QString &timestamp );
 
     /**
      * Updates upload progressbar.

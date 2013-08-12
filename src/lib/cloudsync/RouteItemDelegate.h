@@ -25,6 +25,7 @@ signals:
     void downloadButtonClicked( QString timestamp );
     void openButtonClicked( QString timestamp );
     void deleteButtonClicked( QString timestamp );
+    void removeFromCacheButtonClicked( QString timestamp );
 
 private:
     enum Element {

@@ -701,6 +701,7 @@ void RoutingWidget::openCloudRoutesDialog()
     connect( dialog, SIGNAL(downloadButtonClicked(QString)), manager, SLOT(downloadRoute(QString)) );
     connect( dialog, SIGNAL(openButtonClicked(QString)), manager, SLOT(openRoute(QString)) );
     connect( dialog, SIGNAL(deleteButtonClicked(QString)), manager, SLOT(deleteRoute(QString)) );
+    connect( dialog, SIGNAL(removeFromCacheButtonClicked(QString)), manager, SLOT(removeRouteFromCache(QString)) );
     dialog->exec();
 }
 

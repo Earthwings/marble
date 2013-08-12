@@ -37,6 +37,7 @@ CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model ) : QDialog(),
     connect( delegate, SIGNAL(downloadButtonClicked(QString)), this, SIGNAL(downloadButtonClicked(QString)) );
     connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
     connect( delegate, SIGNAL(deleteButtonClicked(QString)), this, SIGNAL(deleteButtonClicked(QString)) );
+    connect( delegate, SIGNAL(removeFromCacheButtonClicked(QString)), this, SIGNAL(removeFromCacheButtonClicked(QString)) );
     connect( d->m_model, SIGNAL(modelReset()), this, SLOT(displayNoRouteLabel()) );
 
     d->progressBar->setHidden( true );

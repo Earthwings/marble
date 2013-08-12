@@ -10,6 +10,11 @@
 
 #include "AbstractSyncBackend.h"
 
+#include "MarbleDebug.h"
+
+#include <QDebug>
+#include <QFile>
+
 namespace Marble
 {
 class AbstractSyncBackend::Private {
@@ -44,6 +49,16 @@ QUrl AbstractSyncBackend::endpointUrl( const QString &endpoint, const QString &p
 {
     QString endpointUrl = QString( "%0/%1/%2" ).arg( d->m_apiUrl.toString() ).arg( endpoint ).arg( parameter );
     return QUrl( endpointUrl );
+}
+
+void AbstractSyncBackend::removeFromCache( const QDir &cacheDir, const QString &timestamp )
+{
+    bool fileRemoved = QFile( QString( "%0/%1.kml" ).arg( cacheDir.absolutePath(), timestamp ) ).remove();
+    bool previewRemoved = QFile( QString( "%0/preview/%1.jpg" ).arg( cacheDir.absolutePath(), timestamp ) ).remove();
+    if ( !fileRemoved || !previewRemoved ) {
+        mDebug() << "Failed to remove locally cached route " << timestamp << ". It might "
+                    "have been removed already, or its directory is missing / not writable.";
+    }
 }
 
 }

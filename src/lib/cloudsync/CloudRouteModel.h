@@ -56,12 +56,6 @@ public:
     bool isCached( const QModelIndex &index ) const;
 
     /**
-     * Removes route with given index from local cache.
-     * @param index Index of the route.
-     */
-    void removeFromCache( const QModelIndex &index );
-
-    /**
      * Marks the route at given index as being downloaded.
      * @param index Index of the route.
      */
