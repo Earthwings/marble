@@ -98,7 +98,7 @@ class MarbleModelPrivate
           m_routingManager( 0 ),
           m_legend( 0 ),
           m_workOffline( false ),
-          m_cloudSyncManager( new CloudSyncManager() )
+          m_cloudSyncManager()
     {
         m_descendantProxy.setSourceModel( &m_treeModel );
 
@@ -695,7 +695,7 @@ void MarbleModel::setWorkOffline( bool workOffline )
 {
     if ( d->m_workOffline != workOffline ) {
         downloadManager()->setDownloadEnabled( !workOffline );
-        cloudSyncManager()->setOfflineMode( workOffline );
+        cloudSyncManager()->setWorkOffline( workOffline );
 
         d->m_workOffline = workOffline;
         emit workOfflineChanged();

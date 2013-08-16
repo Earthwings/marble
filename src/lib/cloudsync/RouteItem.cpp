@@ -15,7 +15,7 @@ namespace Marble {
 class RouteItem::Private {
 
 public:
-    QString m_timestamp;
+    QString m_identifier;
     QString m_name;
     QIcon m_preview;
     QUrl m_previewUrl;
@@ -23,28 +23,38 @@ public:
     QString m_duration;
 };
 
-RouteItem::RouteItem() : d( new Private )
+RouteItem::RouteItem() : d( new Private() )
 {
 }
 
-RouteItem::~RouteItem()
-{
+//RouteItem::RouteItem( const RouteItem &other  ) : d( new Private( *other.d ) )
+//{
+//}
+
+//RouteItem::~RouteItem()
+//{
 //    delete d;
-}
+//}
+
+//RouteItem &RouteItem::operator=( const RouteItem &other )
+//{
+//    *d = *other.d;
+//    return *this;
+//}
 
 bool RouteItem::operator==( const RouteItem& other ) const
 {
-    return timestamp() == other.timestamp();
+    return identifier() == other.identifier();
 }
 
-QString RouteItem::timestamp() const
+QString RouteItem::identifier() const
 {
-    return d->m_timestamp;
+    return d->m_identifier;
 }
 
-void RouteItem::setTimestamp( const QString &timestamp )
+void RouteItem::setIdentifier( const QString &timestamp )
 {
-    d->m_timestamp = timestamp;
+    d->m_identifier = timestamp;
 }
 
 QString RouteItem::name() const

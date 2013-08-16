@@ -26,21 +26,22 @@ class MARBLE_EXPORT CloudSyncManager : public QObject
     
 public:
     explicit CloudSyncManager( QObject *parent = 0 );
+    ~CloudSyncManager();
 
     RouteSyncManager* routeSyncManager();
-    void initializeRouteSyncManager(  RoutingManager *routingManager );
+    void setRouteSyncManager( RoutingManager *routingManager );
 
     /**
      * Getter for offine mode.
      * @return true if offline mode enabled
      */
-    bool offlineMode();
+    bool workOffline();
 
     /**
      * Setter for offine mode.
      * @param offline Status of offline mode
      */
-    void setOfflineMode( bool offline );
+    void setWorkOffline( bool offline );
 
     enum Backend {
         Owncloud
@@ -62,37 +63,37 @@ public:
      * Getter for currently selected backend.
      * @return Selected backend
      */
-    Backend backend();
+    Backend backend() const;
 
     /**
      * Gets ownCloud server from settings.
      * @return ownCloud server
      */
-    QString server();
+    QString server() const;
 
     /**
      * Gets ownCloud username from settings.
      * @return ownCloud username
      */
-    QString username();
+    QString username() const;
 
     /**
      * Gets ownCloud password from settings
      * @return ownCloud password
      */
-    QString password();
+    QString password() const;
 
     /**
      * Setter for enabling/disabling synchronization.
      * @param enabled Status of synchronization.
      */
-    void setSyncEnabled( const bool &enabled );
+    void setSyncEnabled( bool enabled );
 
     /**
      * Setter for enabling/disabling synchronization.
      * @param enabled Status of route synchronization
      */
-    void setRouteSyncEnabled( const bool &enabled );
+    void setRouteSyncEnabled( bool enabled );
 
     /**
      * Setter for ownCloud server.
@@ -116,13 +117,13 @@ public:
      * Returns API path as a QString.
      * @return API path
      */
-    QString apiPath();
+    QString apiPath() const;
 
     /**
      * Returns an API url ready for use.
      * @return API url as QString
      */
-    QUrl apiUrl();
+    QUrl apiUrl() const;
 
 private:
     class Private;

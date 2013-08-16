@@ -76,9 +76,6 @@ class MarblePart: public KParts::ReadOnlyPart
     void  createPluginMenus();
     void  createFolderList();
     void  fallBackToDefaultTheme();
-    
-  Q_SIGNALS:
-    void  cloudSettingsSent( QString server, QString username, QString password );
 
   private Q_SLOTS:
     void  exportMapScreenShot();

@@ -57,7 +57,7 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
     if ( index.isValid() && index.row() >= 0 && index.row() < d->m_items.size() ) {
         switch( role ) {
         case Qt::DecorationRole: return preview( index );
-        case Timestamp: return d->m_items.at( index.row() ).timestamp();
+        case Timestamp: return d->m_items.at( index.row() ).identifier();
         case Name: return d->m_items.at( index.row() ).name();
         case PreviewUrl: return d->m_items.at( index.row() ).previewUrl();
         case Distance: return d->m_items.at( index.row() ).distance();
@@ -73,13 +73,14 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
 int CloudRouteModel::rowCount( const QModelIndex &parent ) const
 {
     Q_UNUSED( parent )
-    return d->m_items.count();
+    return parent.isValid() ? 0 : d->m_items.count();
 }
 
 void CloudRouteModel::setItems( const QVector<RouteItem> &items )
 {
+    beginResetModel();
     d->m_items = items;
-    reset();
+    endResetModel();
 }
 
 bool CloudRouteModel::isCached( const QModelIndex &index ) const
@@ -88,7 +89,7 @@ bool CloudRouteModel::isCached( const QModelIndex &index ) const
     return cacheDir.exists();
 }
 
-QPersistentModelIndex CloudRouteModel::downloadingItem()
+QPersistentModelIndex CloudRouteModel::downloadingItem() const
 {
     return d->m_downloading;
 }
@@ -98,24 +99,24 @@ void CloudRouteModel::setDownloadingItem(const QPersistentModelIndex &index )
     d->m_downloading = index;
 }
 
-bool CloudRouteModel::isDownloading(const QModelIndex &index ) const
+bool CloudRouteModel::isDownloading( const QModelIndex &index ) const
 {
     return d->m_downloading == index;
 }
 
-qint64 CloudRouteModel::totalSize()
+qint64 CloudRouteModel::totalSize() const
 {
     return d->m_totalSize;
 }
 
-qint64 CloudRouteModel::downloadedSize()
+qint64 CloudRouteModel::downloadedSize() const
 {
     return d->m_downloadedSize;
 }
 
 QIcon CloudRouteModel::preview( const QModelIndex &index ) const
 {
-    QString timestamp = d->m_items.at( index.row() ).timestamp();
+    QString timestamp = d->m_items.at( index.row() ).identifier();
     if( d->m_items.at( index.row() ).preview().isNull() && !d->m_requestedPreviews.contains( timestamp ) ) {
         QUrl url( d->m_items.at( index.row() ).previewUrl() );
         QNetworkRequest request( url );
@@ -132,7 +133,7 @@ void CloudRouteModel::setPreview( QNetworkReply *reply )
     RouteItem route = d->m_previewQueue.take( reply );
     QIcon icon( QPixmap::fromImage( QImage::fromData( reply->readAll() ) ) );
     route.setPreview( icon );
-    d->m_requestedPreviews.remove( route.timestamp() );
+    d->m_requestedPreviews.remove( route.identifier() );
 }
 
 void CloudRouteModel::updateProgress( qint64 currentSize, qint64 totalSize )

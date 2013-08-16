@@ -570,7 +570,7 @@ void QtMarbleConfigDialog::initializeCustomTimezone()
 
 bool QtMarbleConfigDialog::syncEnabled() const
 {
-    return d->m_settings.value( "CloudSync/enableSync", "" ).toBool();
+    return d->m_settings.value( "CloudSync/enableSync", false ).toBool();
 }
 
 QString QtMarbleConfigDialog::syncBackend() const
@@ -580,12 +580,12 @@ QString QtMarbleConfigDialog::syncBackend() const
 
 bool QtMarbleConfigDialog::syncBookmarks() const
 {
-    return d->m_settings.value( "CloudSync/syncBookmarks", "" ).toBool();
+    return d->m_settings.value( "CloudSync/syncBookmarks", true ).toBool();
 }
 
 bool QtMarbleConfigDialog::syncRoutes() const
 {
-    return d->m_settings.value( "CloudSync/syncRoutes", "" ).toBool();
+    return d->m_settings.value( "CloudSync/syncRoutes", true ).toBool();
 }
 
 QString QtMarbleConfigDialog::owncloudServer() const

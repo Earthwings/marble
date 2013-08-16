@@ -340,7 +340,7 @@ RoutingWidget::RoutingWidget( MarbleWidget *marbleWidget, QWidget *parent ) :
     setShowDirectionsButtonVisible( false );
     updateActiveRoutingProfile();
 
-    d->m_widget->model()->cloudSyncManager()->initializeRouteSyncManager( d->m_routingManager );
+    d->m_widget->model()->cloudSyncManager()->setRouteSyncManager( d->m_routingManager );
 
     if ( MarbleGlobal::getInstance()->profiles() & MarbleGlobal::SmallScreen ) {
         d->m_ui.directionsListView->setVisible( false );
@@ -695,9 +695,8 @@ void RoutingWidget::openCloudRoutesDialog()
     RouteSyncManager *manager = d->m_widget->model()->cloudSyncManager()->routeSyncManager();
     QTimer::singleShot( 0, manager, SLOT(downloadRouteList()) );
 
-    CloudRoutesDialog *dialog = new CloudRoutesDialog( manager->model() );
+    CloudRoutesDialog *dialog = new CloudRoutesDialog( manager->model(), d->m_widget );
     connect( manager, SIGNAL(routeListDownloadProgress(qint64,qint64)), dialog, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
-    connect( manager, SIGNAL(routeDownloadProgress(qint64,qint64)), manager->model(), SLOT(updateProgress(qint64,qint64)) );
     connect( dialog, SIGNAL(downloadButtonClicked(QString)), manager, SLOT(downloadRoute(QString)) );
     connect( dialog, SIGNAL(openButtonClicked(QString)), manager, SLOT(openRoute(QString)) );
     connect( dialog, SIGNAL(deleteButtonClicked(QString)), manager, SLOT(deleteRoute(QString)) );

@@ -57,7 +57,7 @@ public:
      * Getter for the item currently being downloaded.
      * @return Model for the item currently being downloaded
      */
-    QPersistentModelIndex downloadingItem();
+    QPersistentModelIndex downloadingItem() const;
 
     /**
      * Marks the route at given index as being downloaded.
@@ -76,13 +76,13 @@ public:
      * Total size of the item currently being downloaded.
      * @return Total size of the item, -1 if no route is being downloaded
      */
-    qint64 totalSize();
+    qint64 totalSize() const;
 
     /**
      * Returns how much of the route are downloaded as bytes
      * @return Downloaded bytes
      */
-    qint64 downloadedSize();
+    qint64 downloadedSize() const;
 
     /**
      * Checks whether a preview for the route available and

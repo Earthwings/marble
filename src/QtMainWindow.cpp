@@ -1229,11 +1229,12 @@ void MainWindow::readSettings(const QVariantMap& overrideSettings)
      settings.endGroup();
 
      settings.beginGroup( "CloudSync" );
-     m_controlView->marbleWidget()->model()->cloudSyncManager()->setSyncEnabled( settings.value( "enableSync", "" ).toBool() );
-     m_controlView->marbleWidget()->model()->cloudSyncManager()->setRouteSyncEnabled( settings.value( "syncRoutes", "" ).toBool() );
-     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudServer( settings.value( "owncloudServer", "" ).toString() );
-     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudUsername( settings.value( "owncloudUsername", "" ).toString() );
-     m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudPassword( settings.value( "owncloudPassword", "" ).toString() );
+     CloudSyncManager* cloudSyncManager = m_controlView->marbleWidget()->model()->cloudSyncManager();
+     cloudSyncManager->setSyncEnabled( settings.value( "enableSync", false ).toBool() );
+     cloudSyncManager->setRouteSyncEnabled( settings.value( "syncRoutes", true ).toBool() );
+     cloudSyncManager->setOwncloudServer( settings.value( "owncloudServer", "" ).toString() );
+     cloudSyncManager->setOwncloudUsername( settings.value( "owncloudUsername", "" ).toString() );
+     cloudSyncManager->setOwncloudPassword( settings.value( "owncloudPassword", "" ).toString() );
      settings.endGroup();
 }
 
@@ -1416,11 +1417,12 @@ void MainWindow::updateSettings()
     m_controlView->marbleWidget()->setProxy( m_configDialog->proxyUrl(), m_configDialog->proxyPort(), m_configDialog->user(), m_configDialog->password() );
     */
 
-    m_controlView->marbleWidget()->model()->cloudSyncManager()->setSyncEnabled( m_configDialog->syncEnabled() );
-    m_controlView->marbleWidget()->model()->cloudSyncManager()->setRouteSyncEnabled( m_configDialog->syncRoutes() );
-    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudServer( m_configDialog->owncloudServer() );
-    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudUsername( m_configDialog->owncloudUsername() );
-    m_controlView->marbleWidget()->model()->cloudSyncManager()->setOwncloudPassword( m_configDialog->owncloudPassword() );
+    CloudSyncManager* cloudSyncManager = m_controlView->marbleWidget()->model()->cloudSyncManager();
+    cloudSyncManager->setSyncEnabled( m_configDialog->syncEnabled() );
+    cloudSyncManager->setRouteSyncEnabled( m_configDialog->syncRoutes() );
+    cloudSyncManager->setOwncloudServer( m_configDialog->owncloudServer() );
+    cloudSyncManager->setOwncloudUsername( m_configDialog->owncloudUsername() );
+    cloudSyncManager->setOwncloudPassword( m_configDialog->owncloudPassword() );
 
     m_controlView->marbleWidget()->update();
 }

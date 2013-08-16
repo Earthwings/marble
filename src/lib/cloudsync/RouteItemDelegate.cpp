@@ -17,10 +17,6 @@ RouteItemDelegate::RouteItemDelegate( QListView *view, CloudRouteModel *model ) 
 {
 }
 
-RouteItemDelegate::~RouteItemDelegate()
-{
-}
-
 void RouteItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
     

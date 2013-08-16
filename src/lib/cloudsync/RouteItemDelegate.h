@@ -14,7 +14,6 @@ class RouteItemDelegate : public QStyledItemDelegate {
     
 public:
     RouteItemDelegate( QListView *view, CloudRouteModel *model );
-    ~RouteItemDelegate();
 
     void paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const;
     QSize sizeHint( const QStyleOptionViewItem& option, const QModelIndex& index ) const;

@@ -25,7 +25,8 @@ class CloudRoutesDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit CloudRoutesDialog( CloudRouteModel *model );
+    CloudRoutesDialog( CloudRouteModel *model, QWidget *parent = 0 );
+    ~CloudRoutesDialog();
     CloudRouteModel *model();
 
 public slots:
@@ -42,8 +43,7 @@ private:
     Private *d;
 
 private slots:
-    void hideListDownloadProgressbar();
-    void displayNoRouteLabel();
+    void updateNoRouteLabel();
 };
 
 }

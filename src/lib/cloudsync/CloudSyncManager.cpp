@@ -31,10 +31,10 @@ public:
 };
 
 CloudSyncManager::Private::Private() :
-    m_routeSyncManager(),
+    m_routeSyncManager( 0 ),
     m_offlineMode( false ),
     m_syncEnabled( false ),
-    m_routeSyncEnabled( false ),
+    m_routeSyncEnabled( true ),
     m_ownloudServer(),
     m_owncloudUsername(),
     m_owncloudPassword()
@@ -46,27 +46,33 @@ CloudSyncManager::CloudSyncManager( QObject *parent ) : QObject( parent ),
 {
 }
 
+CloudSyncManager::~CloudSyncManager()
+{
+    delete d;
+}
+
 RouteSyncManager* CloudSyncManager::routeSyncManager()
 {
     return d->m_routeSyncManager;
 }
 
-void CloudSyncManager::initializeRouteSyncManager( RoutingManager *routingManager )
+void CloudSyncManager::setRouteSyncManager( RoutingManager *routingManager )
 {
+    delete d->m_routeSyncManager;
     d->m_routeSyncManager = new RouteSyncManager( this, routingManager );
 }
 
-bool CloudSyncManager::offlineMode()
+bool CloudSyncManager::workOffline()
 {
     return d->m_offlineMode;
 }
 
-void CloudSyncManager::setOfflineMode( bool offline )
+void CloudSyncManager::setWorkOffline( bool offline )
 {
     d->m_offlineMode = offline;
 }
 
-CloudSyncManager::Backend CloudSyncManager::backend()
+CloudSyncManager::Backend CloudSyncManager::backend() const
 {
     return Owncloud;
 }
@@ -81,27 +87,27 @@ bool CloudSyncManager::isRouteSyncEnabled()
     return d->m_routeSyncEnabled;
 }
 
-QString CloudSyncManager::server()
+QString CloudSyncManager::server() const
 {
     return d->m_ownloudServer;
 }
 
-QString CloudSyncManager::username()
+QString CloudSyncManager::username() const
 {
     return d->m_owncloudUsername;
 }
 
-QString CloudSyncManager::password()
+QString CloudSyncManager::password() const
 {
     return d->m_owncloudPassword;
 }
 
-void CloudSyncManager::setSyncEnabled( const bool &enabled )
+void CloudSyncManager::setSyncEnabled( bool enabled )
 {
     d->m_syncEnabled = enabled;
 }
 
-void CloudSyncManager::setRouteSyncEnabled( const bool &enabled )
+void CloudSyncManager::setRouteSyncEnabled( bool enabled )
 {
     d->m_routeSyncEnabled = enabled;
 }
@@ -121,12 +127,12 @@ void CloudSyncManager::setOwncloudPassword( const QString &password )
     d->m_owncloudPassword = password;
 }
 
-QString CloudSyncManager::apiPath()
+QString CloudSyncManager::apiPath() const
 {
     return "index.php/apps/marble/api/v1";
 }
 
-QUrl CloudSyncManager::apiUrl()
+QUrl CloudSyncManager::apiUrl() const
 {
     return QUrl( QString( "http://%0:%1@%2/%3" )
                 .arg( username() ).arg( password() )

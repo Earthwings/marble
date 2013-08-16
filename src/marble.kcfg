@@ -305,10 +305,10 @@
    <default>owncloud</default>
   </entry>
   <entry key="syncBookmarks" type="Bool" >
-   <default>false</default>
+   <default>true</default>
   </entry>
   <entry key="syncRoutes" type="Bool" >
-   <default>false</default>
+   <default>true</default>
   </entry>
   <entry name="owncloudServer" type="String">
    <default></default>

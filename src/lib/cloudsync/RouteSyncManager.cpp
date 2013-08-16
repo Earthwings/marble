@@ -70,6 +70,7 @@ RouteSyncManager::Private::Private( CloudSyncManager *cloudSyncManager, RoutingM
 RouteSyncManager::RouteSyncManager( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager ) :
     d( new Private( cloudSyncManager, routingManager ) )
 {
+    connect( this, SIGNAL(routeDownloadProgress(qint64,qint64)), d->m_model, SLOT(updateProgress(qint64,qint64)) );
 }
 
 RouteSyncManager::~RouteSyncManager()
@@ -100,7 +101,7 @@ QString RouteSyncManager::saveDisplayedToCache() const
 
 void RouteSyncManager::uploadRoute()
 {
-    if( !d->m_cloudSyncManager->offlineMode() ) {
+    if( !d->m_cloudSyncManager->workOffline() ) {
         d->m_owncloudBackend->uploadRoute( saveDisplayedToCache() );
         connect( d->m_owncloudBackend, SIGNAL(routeUploadProgress(qint64,qint64)),
                  this, SLOT(updateUploadProgressbar(qint64,qint64)) );
@@ -113,7 +114,7 @@ QVector<RouteItem> RouteSyncManager::cachedRouteList()
 {
     QVector<RouteItem> routeList;
     QStringList cachedRoutes = d->m_cacheDir.entryList( QStringList() << "*.kml", QDir::Files );
-    foreach ( QString routeFilename, cachedRoutes ) {
+    foreach ( const QString &routeFilename, cachedRoutes ) {
         QFile file( d->m_cacheDir.absolutePath() + "/" + routeFilename );
         file.open( QFile::ReadOnly );
 
@@ -148,7 +149,7 @@ QVector<RouteItem> RouteSyncManager::cachedRouteList()
         }
 
         RouteItem item;
-        item.setTimestamp( timestamp );
+        item.setIdentifier( timestamp );
         item.setName( routeName );
         item.setDistance( distance );
         item.setDistance( duration );
@@ -161,7 +162,7 @@ QVector<RouteItem> RouteSyncManager::cachedRouteList()
 
 void RouteSyncManager::downloadRouteList()
 {
-    if( !d->m_cloudSyncManager->offlineMode() ) {
+    if( !d->m_cloudSyncManager->workOffline() ) {
         if( d->m_cloudSyncManager->backend()  == CloudSyncManager::Owncloud ) {
             connect( d->m_owncloudBackend, SIGNAL(routeListDownloaded(QVector<RouteItem>)),
                      this, SLOT(processRouteList(QVector<RouteItem>)) );
@@ -174,7 +175,7 @@ void RouteSyncManager::downloadRouteList()
     }
 }
 
-void RouteSyncManager::processRouteList( QVector<RouteItem> routeList )
+void RouteSyncManager::processRouteList( const QVector<RouteItem> &routeList )
 {
     d->m_model->setItems( routeList );
 }

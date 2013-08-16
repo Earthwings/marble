@@ -12,7 +12,6 @@
 
 #include "MarbleDebug.h"
 
-#include <QDebug>
 #include <QFile>
 
 namespace Marble

@@ -25,7 +25,7 @@ class OwncloudSyncBackend : public AbstractSyncBackend
     Q_OBJECT
     
 public:
-    explicit OwncloudSyncBackend( QUrl apiUrl );
+    explicit OwncloudSyncBackend( const QUrl &apiUrl );
     ~OwncloudSyncBackend();
 
     void uploadRoute( const QString &timestamp );
@@ -43,8 +43,8 @@ private slots:
     void saveDownloadedRoute();
 
 signals:
-    void routeListDownloaded( QVector<RouteItem> routeList );
-    void routeDownloaded( QString rawRoute, QString timestamp );
+    void routeListDownloaded( const QVector<RouteItem> &routeList );
+    void routeDownloaded( const QString &rawRoute, const QString &timestamp );
     void routeDeleted();
     void routeUploadProgress( qint64 sent, qint64 total );
     void routeDownloadProgress( qint64 received, qint64 total );

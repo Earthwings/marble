@@ -21,12 +21,17 @@ class RouteItem {
 
 public:
     RouteItem();
-    ~RouteItem();
+
+//    FIXME: Those are needed for properly deleting
+//    d-pointer but they break route preview feature.
+//    RouteItem( const RouteItem &other );
+//    ~RouteItem();
+//    RouteItem& operator=(const RouteItem &other);
 
     bool operator==( const RouteItem &other ) const;
 
-    QString timestamp() const;
-    void setTimestamp( const QString &timestamp );
+    QString identifier() const;
+    void setIdentifier( const QString &identifier );
 
     QString name() const;
     void setName( const QString &name );

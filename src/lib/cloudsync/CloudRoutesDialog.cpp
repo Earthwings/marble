@@ -28,7 +28,7 @@ CloudRoutesDialog::Private::Private( CloudRouteModel *model ) : Ui::CloudRoutesD
 {
 }
 
-CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model ) : QDialog(),
+CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model, QWidget *parent ) : QDialog( parent ),
     d( new Private( model ) )
 {
     d->setupUi( this );
@@ -38,13 +38,18 @@ CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model ) : QDialog(),
     connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
     connect( delegate, SIGNAL(deleteButtonClicked(QString)), this, SIGNAL(deleteButtonClicked(QString)) );
     connect( delegate, SIGNAL(removeFromCacheButtonClicked(QString)), this, SIGNAL(removeFromCacheButtonClicked(QString)) );
-    connect( d->m_model, SIGNAL(modelReset()), this, SLOT(displayNoRouteLabel()) );
+    connect( d->m_model, SIGNAL(modelReset()), this, SLOT(updateNoRouteLabel()) );
 
     d->progressBar->setHidden( true );
     d->labelNoRoute->setHidden( true );
 
     d->listView->setItemDelegate( delegate );
     d->listView->setModel( d->m_model );
+}
+
+CloudRoutesDialog::~CloudRoutesDialog()
+{
+    delete d;
 }
 
 CloudRouteModel* CloudRoutesDialog::model()
@@ -57,15 +62,11 @@ void CloudRoutesDialog::updateListDownloadProgressbar( qint64 received, qint64 t
     d->progressBar->setHidden( false );
     d->progressBar->setValue( qRound( 100.0 * qreal( received ) / total ) );
     if( received == total ) {
-        QTimer::singleShot( 1000, this, SLOT(hideListDownloadProgressbar()) );
+        QTimer::singleShot( 1000, d->progressBar, SLOT(hide()) );
     }
 }
 
-void CloudRoutesDialog::hideListDownloadProgressbar() {
-    d->progressBar->setHidden( true );
-}
-
-void CloudRoutesDialog::displayNoRouteLabel() {
+void CloudRoutesDialog::updateNoRouteLabel() {
     bool const isEmpty = d->listView->model()->rowCount() == 0;
     d->listView->setHidden( isEmpty );
     d->labelNoRoute->setVisible( isEmpty );

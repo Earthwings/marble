@@ -22,7 +22,7 @@ namespace Marble {
  */
 class RouteParser : public GeoParser {
 public:
-    explicit RouteParser();
+    RouteParser();
     virtual GeoDataDocument* createDocument() const;
     virtual bool isValidRootElement();
 };

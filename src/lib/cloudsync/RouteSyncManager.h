@@ -70,7 +70,7 @@ public slots:
      * Forwards the route list to CloudRouteModel
      * @param routeList Downloaded route list
      */
-    void processRouteList( QVector<RouteItem> routeList );
+    void processRouteList( const QVector<RouteItem> &routeList );
 
     /**
      * Starts the download of specified route.
