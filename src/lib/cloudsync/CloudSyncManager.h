@@ -28,9 +28,6 @@ public:
     explicit CloudSyncManager( QObject *parent = 0 );
     ~CloudSyncManager();
 
-    RouteSyncManager* routeSyncManager();
-    void setRouteSyncManager( RoutingManager *routingManager );
-
     /**
      * Getter for offine mode.
      * @return true if offline mode enabled

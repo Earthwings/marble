@@ -18,8 +18,6 @@ class CloudSyncManager::Private {
 public:
     Private();
 
-    RouteSyncManager *m_routeSyncManager;
-
     bool m_offlineMode;
 
     bool m_syncEnabled;
@@ -49,17 +47,6 @@ CloudSyncManager::CloudSyncManager( QObject *parent ) : QObject( parent ),
 CloudSyncManager::~CloudSyncManager()
 {
     delete d;
-}
-
-RouteSyncManager* CloudSyncManager::routeSyncManager()
-{
-    return d->m_routeSyncManager;
-}
-
-void CloudSyncManager::setRouteSyncManager( RoutingManager *routingManager )
-{
-    delete d->m_routeSyncManager;
-    d->m_routeSyncManager = new RouteSyncManager( this, routingManager );
 }
 
 bool CloudSyncManager::workOffline()

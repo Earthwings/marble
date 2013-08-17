@@ -64,6 +64,8 @@ public:
 
     RouteRequest *const m_routeRequest;
 
+    RouteSyncManager *m_routeSyncManager;
+
     bool m_zoomRouteAfterDownload;
 
     QTimer m_progressTimer;
@@ -121,6 +123,8 @@ RoutingWidgetPrivate::RoutingWidgetPrivate( RoutingWidget *parent, MarbleWidget 
         m_inputRequest( 0 ),
         m_routingModel( m_routingManager->routingModel() ),
         m_routeRequest( marbleWidget->model()->routingManager()->routeRequest() ),
+        m_routeSyncManager( new RouteSyncManager( marbleWidget->model()->cloudSyncManager(),
+                                                  marbleWidget->model()->routingManager() ) ),
         m_zoomRouteAfterDownload( false ),
         m_currentFrame( 0 ),
         m_iconSize( 16 ),
@@ -339,8 +343,6 @@ RoutingWidget::RoutingWidget( MarbleWidget *marbleWidget, QWidget *parent ) :
     d->m_ui.resultLabel->setVisible( false );
     setShowDirectionsButtonVisible( false );
     updateActiveRoutingProfile();
-
-    d->m_widget->model()->cloudSyncManager()->setRouteSyncManager( d->m_routingManager );
 
     if ( MarbleGlobal::getInstance()->profiles() & MarbleGlobal::SmallScreen ) {
         d->m_ui.directionsListView->setVisible( false );
@@ -687,20 +689,19 @@ void RoutingWidget::saveRoute()
 
 void RoutingWidget::uploadToCloud()
 {
-    d->m_widget->model()->cloudSyncManager()->routeSyncManager()->uploadRoute();
+    d->m_routeSyncManager->uploadRoute();
 }
 
 void RoutingWidget::openCloudRoutesDialog()
 {
-    RouteSyncManager *manager = d->m_widget->model()->cloudSyncManager()->routeSyncManager();
-    QTimer::singleShot( 0, manager, SLOT(downloadRouteList()) );
+    d->m_routeSyncManager->downloadRouteList();
 
-    CloudRoutesDialog *dialog = new CloudRoutesDialog( manager->model(), d->m_widget );
-    connect( manager, SIGNAL(routeListDownloadProgress(qint64,qint64)), dialog, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
-    connect( dialog, SIGNAL(downloadButtonClicked(QString)), manager, SLOT(downloadRoute(QString)) );
-    connect( dialog, SIGNAL(openButtonClicked(QString)), manager, SLOT(openRoute(QString)) );
-    connect( dialog, SIGNAL(deleteButtonClicked(QString)), manager, SLOT(deleteRoute(QString)) );
-    connect( dialog, SIGNAL(removeFromCacheButtonClicked(QString)), manager, SLOT(removeRouteFromCache(QString)) );
+    CloudRoutesDialog *dialog = new CloudRoutesDialog( d->m_routeSyncManager->model(), d->m_widget );
+    connect( d->m_routeSyncManager, SIGNAL(routeListDownloadProgress(qint64,qint64)), dialog, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
+    connect( dialog, SIGNAL(downloadButtonClicked(QString)), d->m_routeSyncManager, SLOT(downloadRoute(QString)) );
+    connect( dialog, SIGNAL(openButtonClicked(QString)), d->m_routeSyncManager, SLOT(openRoute(QString)) );
+    connect( dialog, SIGNAL(deleteButtonClicked(QString)), d->m_routeSyncManager, SLOT(deleteRoute(QString)) );
+    connect( dialog, SIGNAL(removeFromCacheButtonClicked(QString)), d->m_routeSyncManager, SLOT(removeRouteFromCache(QString)) );
     dialog->exec();
 }
 
