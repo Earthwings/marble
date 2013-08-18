@@ -717,6 +717,10 @@ CloudSyncManager *MarbleModel::cloudSyncManager()
     return &d->m_cloudSyncManager;
 }
 
+const CloudSyncManager* MarbleModel::cloudSyncManager() const
+{
+    return &d->m_cloudSyncManager;
+}
 
 }
 

@@ -57,7 +57,7 @@ public:
      * Gathers data from local cache directory and returns a route list.
      * @return Routes stored in local cache
      */
-    QVector<RouteItem> cachedRouteList();
+    QVector<RouteItem> cachedRouteList() const;
 
 public slots:
     /**

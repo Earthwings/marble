@@ -110,7 +110,7 @@ void RouteSyncManager::uploadRoute()
     }
 }
 
-QVector<RouteItem> RouteSyncManager::cachedRouteList()
+QVector<RouteItem> RouteSyncManager::cachedRouteList() const
 {
     QVector<RouteItem> routeList;
     QStringList cachedRoutes = d->m_cacheDir.entryList( QStringList() << "*.kml", QDir::Files );

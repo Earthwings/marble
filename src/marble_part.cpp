@@ -1403,7 +1403,7 @@ void MarblePart::editSettings()
 
     w_cloudSyncSettings->setObjectName( "sync_page" );
     ui_cloudSyncSettings.setupUi( w_cloudSyncSettings );
-    m_configDialog->addPage( w_cloudSyncSettings, i18n( "Synchronization" ), "flag" );
+    m_configDialog->addPage( w_cloudSyncSettings, i18n( "Synchronization" ), "folder-sync" );
     
     // routing page
     RoutingProfilesWidget *w_routingSettings = new RoutingProfilesWidget( m_controlView->marbleModel() );

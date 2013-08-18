@@ -27,20 +27,20 @@ RouteItem::RouteItem() : d( new Private() )
 {
 }
 
-//RouteItem::RouteItem( const RouteItem &other  ) : d( new Private( *other.d ) )
-//{
-//}
+RouteItem::RouteItem( const RouteItem &other  ) : d( new Private( *other.d ) )
+{
+}
 
-//RouteItem::~RouteItem()
-//{
-//    delete d;
-//}
+RouteItem::~RouteItem()
+{
+    delete d;
+}
 
-//RouteItem &RouteItem::operator=( const RouteItem &other )
-//{
-//    *d = *other.d;
-//    return *this;
-//}
+RouteItem &RouteItem::operator=( const RouteItem &other )
+{
+    *d = *other.d;
+    return *this;
+}
 
 bool RouteItem::operator==( const RouteItem& other ) const
 {

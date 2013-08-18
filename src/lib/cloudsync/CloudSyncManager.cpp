@@ -18,7 +18,7 @@ class CloudSyncManager::Private {
 public:
     Private();
 
-    bool m_offlineMode;
+    bool m_workOffline;
 
     bool m_syncEnabled;
     bool m_routeSyncEnabled;
@@ -29,8 +29,7 @@ public:
 };
 
 CloudSyncManager::Private::Private() :
-    m_routeSyncManager( 0 ),
-    m_offlineMode( false ),
+    m_workOffline( false ),
     m_syncEnabled( false ),
     m_routeSyncEnabled( true ),
     m_ownloudServer(),
@@ -51,12 +50,12 @@ CloudSyncManager::~CloudSyncManager()
 
 bool CloudSyncManager::workOffline()
 {
-    return d->m_offlineMode;
+    return d->m_workOffline;
 }
 
 void CloudSyncManager::setWorkOffline( bool offline )
 {
-    d->m_offlineMode = offline;
+    d->m_workOffline = offline;
 }
 
 CloudSyncManager::Backend CloudSyncManager::backend() const

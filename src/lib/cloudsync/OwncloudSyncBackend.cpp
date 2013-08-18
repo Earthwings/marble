@@ -64,7 +64,7 @@ OwncloudSyncBackend::Private::Private() :
     m_routeListReply(),
     m_routeDownloadReply(),
     m_routeDeleteReply(),
-    m_routeList( QVector<RouteItem>() ),
+    m_routeList(),
     // Route API endpoints
     m_routeUploadEndpoint( "routes/create" ),
     m_routeListEndpoint( "routes" ),
@@ -294,6 +294,7 @@ void OwncloudSyncBackend::saveDownloadedRoute()
     if ( !fileOpened ) {
         mDebug() << "Failed to open file" << kmlFilePath << " for writing."
                  <<  " Its directory either is missing or is not writable.";
+        return;
     }
 
     kmlFile.write( d->m_routeDownloadReply->readAll() );
@@ -306,6 +307,7 @@ void OwncloudSyncBackend::saveDownloadedRoute()
     if ( !previewFileOpened ) {
         mDebug() << "Failed to open file" << previewFilePath << "for writing."
                  <<  " Its directory either is missing or is not writable.";
+        return;
     }
 
     QPixmap preview = createPreview( timestamp );

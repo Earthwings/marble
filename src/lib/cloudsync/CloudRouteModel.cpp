@@ -34,7 +34,7 @@ public:
     qint64 m_downloadedSize;
 
     QNetworkAccessManager m_network;
-    QMap<QNetworkReply*, RouteItem> m_previewQueue;
+    QMap<QNetworkReply*, int> m_previewQueue;
     QSet<QString> m_requestedPreviews;
 };
 
@@ -121,7 +121,7 @@ QIcon CloudRouteModel::preview( const QModelIndex &index ) const
         QUrl url( d->m_items.at( index.row() ).previewUrl() );
         QNetworkRequest request( url );
         QNetworkReply *reply = d->m_network.get( request );
-        d->m_previewQueue.insert( reply, d->m_items.at( index.row() ) );
+        d->m_previewQueue.insert( reply, index.row() );
         d->m_requestedPreviews.insert( timestamp );
     }
 
@@ -130,10 +130,11 @@ QIcon CloudRouteModel::preview( const QModelIndex &index ) const
 
 void CloudRouteModel::setPreview( QNetworkReply *reply )
 {
-    RouteItem route = d->m_previewQueue.take( reply );
+    int position = d->m_previewQueue.take( reply );
+    RouteItem *route = &( d->m_items[ position ] );
     QIcon icon( QPixmap::fromImage( QImage::fromData( reply->readAll() ) ) );
-    route.setPreview( icon );
-    d->m_requestedPreviews.remove( route.identifier() );
+    route->setPreview( icon );
+    d->m_requestedPreviews.remove( route->identifier() );
 }
 
 void CloudRouteModel::updateProgress( qint64 currentSize, qint64 totalSize )
