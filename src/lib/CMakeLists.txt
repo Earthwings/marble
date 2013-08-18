@@ -460,16 +460,6 @@ else (APPLE AND QTONLY)
     routing/RoutingManager.h
     routing/RoutingModel.h
     routing/RoutingProfile.h
-    
-    cloudsync/CloudSyncManager.h
-    cloudsync/RouteSyncManager.h
-    cloudsync/AbstractSyncBackend.h
-    cloudsync/OwncloudSyncBackend.h
-    cloudsync/CloudRouteModel.h
-    cloudsync/CloudRoutesDialog.h
-    cloudsync/RouteItem.h
-    cloudsync/RouteItemDelegate.h
-    cloudsync/RouteParser.h
 
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include/marble
 )

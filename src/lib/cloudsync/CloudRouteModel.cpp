@@ -80,6 +80,8 @@ void CloudRouteModel::setItems( const QVector<RouteItem> &items )
 {
     beginResetModel();
     d->m_items = items;
+    d->m_previewQueue.clear();
+    d->m_requestedPreviews.clear();
     endResetModel();
 }
 
@@ -131,6 +133,11 @@ QIcon CloudRouteModel::preview( const QModelIndex &index ) const
 void CloudRouteModel::setPreview( QNetworkReply *reply )
 {
     int position = d->m_previewQueue.take( reply );
+
+    if( position >= d->m_items.count() ) {
+        return;
+    }
+
     RouteItem *route = &( d->m_items[ position ] );
     QIcon icon( QPixmap::fromImage( QImage::fromData( reply->readAll() ) ) );
     route->setPreview( icon );
