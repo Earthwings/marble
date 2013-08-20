@@ -19,7 +19,6 @@ RouteItemDelegate::RouteItemDelegate( QListView *view, CloudRouteModel *model ) 
 
 void RouteItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
-    
     QStyleOptionViewItemV4 styleOption = option;
     styleOption.text = QString();
     QApplication::style()->drawControl( QStyle::CE_ItemViewItem, &styleOption, painter );
@@ -44,14 +43,15 @@ void RouteItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& op
     painter->setClipRect( 0, 0, textRect.width(), textRect.height() );
     document.documentLayout()->draw( painter, paintContext );
     painter->restore();
-    
+
     bool cached = index.data( CloudRouteModel::IsCached ).toBool();
     bool downloading = index.data( CloudRouteModel::IsDownloading ).toBool();
-    
+    bool onCloud = index.data( CloudRouteModel::IsOnCloud ).toBool();
+
     if ( downloading ) {
         qint64 total = m_model->totalSize();
         qint64 progress = m_model->downloadedSize();
-        
+
         QStyleOptionProgressBar progressBarOption;
         progressBarOption.rect = position( Progressbar, option );
         progressBarOption.minimum = 0;
@@ -60,17 +60,7 @@ void RouteItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& op
         progressBarOption.text = QString::number( progressBarOption.progress ) + "%";
         progressBarOption.textVisible = true;
         QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarOption, painter);
-    } else if ( cached ) {
-        QStyleOptionButton openButton = button( OpenButton, option );
-        QRect openRect = position( OpenButton, option );
-        openButton.rect = openRect;
-        QApplication::style()->drawControl( QStyle::CE_PushButton, &openButton, painter );
-
-        QStyleOptionButton cacheRemoveButton = button( RemoveFromCacheButton, option );
-        QRect cacheRemoveRect = position( RemoveFromCacheButton, option );
-        cacheRemoveButton.rect = cacheRemoveRect;
-        QApplication::style()->drawControl( QStyle::CE_PushButton, &cacheRemoveButton, painter );
-    } else {
+    } else if ( !cached && onCloud ) {
         QStyleOptionButton downloadButton = button( DownloadButton, option );
         QRect downloadRect = position( DownloadButton, option );
         downloadButton.rect = downloadRect;
@@ -80,6 +70,31 @@ void RouteItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& op
         QRect cloudRemoveRect = position( RemoveFromCloudButton, option );
         cloudRemoveButton.rect = cloudRemoveRect;
         QApplication::style()->drawControl( QStyle::CE_PushButton, &cloudRemoveButton, painter );
+    } else if ( cached && !onCloud ) {
+        QStyleOptionButton openButton = button( OpenButton, option );
+        QRect openRect = position( OpenButton, option );
+        openButton.rect = openRect;
+        QApplication::style()->drawControl( QStyle::CE_PushButton, &openButton, painter );
+
+        QStyleOptionButton cacheRemoveButton = button( RemoveFromCacheButton, option );
+        QRect cacheRemoveRect = position( RemoveFromCacheButton, option );
+        cacheRemoveButton.rect = cacheRemoveRect;
+        QApplication::style()->drawControl( QStyle::CE_PushButton, &cacheRemoveButton, painter );
+
+        QStyleOptionButton uploadButton = button( UploadToCloudButton, option );
+        QRect uploadRect = position( UploadToCloudButton, option );
+        uploadButton.rect = uploadRect;
+        QApplication::style()->drawControl( QStyle::CE_PushButton, &uploadButton, painter );
+    } else if ( cached && onCloud ) {
+        QStyleOptionButton openButton = button( OpenButton, option );
+        QRect openRect = position( OpenButton, option );
+        openButton.rect = openRect;
+        QApplication::style()->drawControl( QStyle::CE_PushButton, &openButton, painter );
+
+        QStyleOptionButton cacheRemoveButton = button( RemoveFromCacheButton, option );
+        QRect cacheRemoveRect = position( RemoveFromCacheButton, option );
+        cacheRemoveButton.rect = cacheRemoveRect;
+        QApplication::style()->drawControl( QStyle::CE_PushButton, &cacheRemoveButton, painter );
     }
 }
 
@@ -106,6 +121,17 @@ bool RouteItemDelegate::editorEvent( QEvent* event, QAbstractItemModel* model, c
         QPoint pos = mouseEvent->pos();
         
         bool cached = index.data( CloudRouteModel::IsCached ).toBool();
+        bool onCloud = index.data( CloudRouteModel::IsOnCloud ).toBool();
+
+        if( cached && !onCloud ) {
+            QRect uploadRect = position( UploadToCloudButton, option );
+
+            if ( uploadRect.contains( pos ) ) {
+                QString timestamp = index.data( CloudRouteModel::Timestamp ).toString();
+                emit uploadToCloudButtonClicked( timestamp );
+                return true;
+            }
+        }
 
         if ( cached ) {
             QRect openRect = position( OpenButton, option );
@@ -185,6 +211,11 @@ QStyleOptionButton RouteItemDelegate::button( Element element, const QStyleOptio
         result.icon = QIcon( ":/marble/edit-delete.png" );
         result.iconSize = QSize( m_iconSize, m_iconSize );
         break;
+    case UploadToCloudButton:
+        result.text = tr( "Upload to cloud" );
+        result.icon = QIcon( ":/icons/cloud-upload.png" );
+        result.iconSize = QSize( m_iconSize, m_iconSize );
+        break;
     default:
         // Ignored.
         break;
@@ -229,7 +260,7 @@ QRect RouteItemDelegate::position( Element element, const QStyleOptionViewItem& 
         QSize size = option.fontMetrics.size( 0, optionButton.text ) + QSize( 4, 4 );
         QSize buttonSize = QApplication::style()->sizeFromContents( QStyle::CT_PushButton, &optionButton, size );
         buttonSize.setWidth( width );
-        return QRect( thirdColumn + QPoint( 0, option.fontMetrics.height() + 10 ), buttonSize );
+        return QRect( thirdColumn + QPoint( 0, buttonSize.height() ), buttonSize );
     }
     case Progressbar:
     {
@@ -239,6 +270,14 @@ QRect RouteItemDelegate::position( Element element, const QStyleOptionViewItem& 
     case Preview:
     {
         return QRect( firstColumn, QSize( m_previewSize, m_previewSize) );
+    }
+    case UploadToCloudButton:
+    {
+        QStyleOptionButton optionButton = button( element, option );
+        QSize size = option.fontMetrics.size( 0, optionButton.text ) + QSize( 4, 4 );
+        QSize buttonSize = QApplication::style()->sizeFromContents( QStyle::CT_PushButton, &optionButton, size );
+        buttonSize.setWidth( width );
+        return QRect( thirdColumn + QPoint( 0, buttonSize.height() * 2 ), buttonSize );
     }
     }
     

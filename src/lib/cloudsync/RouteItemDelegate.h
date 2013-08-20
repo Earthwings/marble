@@ -25,6 +25,7 @@ signals:
     void openButtonClicked( QString timestamp );
     void deleteButtonClicked( QString timestamp );
     void removeFromCacheButtonClicked( QString timestamp );
+    void uploadToCloudButtonClicked( QString timestamp );
 
 private:
     enum Element {
@@ -34,7 +35,8 @@ private:
         RemoveFromCacheButton,
         RemoveFromCloudButton,
         Progressbar,
-        Preview
+        Preview,
+        UploadToCloudButton
     };
 
     int buttonWidth( const QStyleOptionViewItem &option ) const;

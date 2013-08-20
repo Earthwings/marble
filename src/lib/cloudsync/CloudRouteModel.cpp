@@ -64,6 +64,7 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
         case Duration: return d->m_items.at( index.row() ).duration();
         case IsCached: return isCached( index );
         case IsDownloading: return isDownloading( index );
+        case IsOnCloud: return d->m_items.at( index.row() ).onCloud();
         }
     }
     

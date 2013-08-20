@@ -51,6 +51,7 @@ public:
 
     QDir m_cacheDir;
     OwncloudSyncBackend *m_owncloudBackend;
+    QVector<RouteItem> m_routeList;
 };
 
 RouteSyncManager::Private::Private( CloudSyncManager *cloudSyncManager, RoutingManager *routingManager ) :
@@ -154,30 +155,46 @@ QVector<RouteItem> RouteSyncManager::cachedRouteList() const
         item.setDistance( distance );
         item.setDistance( duration );
         item.setPreview( preview );
+        item.setOnCloud( false );
         routeList.append( item );
     }
 
     return routeList;
 }
 
-void RouteSyncManager::downloadRouteList()
+void RouteSyncManager::uploadRoute( const QString &timestamp )
 {
+    if( !d->m_cloudSyncManager->workOffline() ) {
+        d->m_owncloudBackend->uploadRoute( timestamp );
+        connect( d->m_owncloudBackend, SIGNAL(routeUploadProgress(qint64,qint64)),
+                 this, SLOT(updateUploadProgressbar(qint64,qint64)) );
+        // FIXME connect( d->m_uploadProgressDialog, SIGNAL(canceled()), syncBackend, SLOT(cancelUpload()) );
+        d->m_uploadProgressDialog->exec();
+    }
+}
+
+void RouteSyncManager::prepareRouteList()
+{
+    d->m_routeList.clear();
+
+    QVector<RouteItem> cachedRoutes = cachedRouteList();
+    foreach( const RouteItem &item, cachedRoutes ) {
+        d->m_routeList.append( item );
+    }
+
     if( !d->m_cloudSyncManager->workOffline() ) {
         if( d->m_cloudSyncManager->backend()  == CloudSyncManager::Owncloud ) {
             connect( d->m_owncloudBackend, SIGNAL(routeListDownloaded(QVector<RouteItem>)),
-                     this, SLOT(processRouteList(QVector<RouteItem>)) );
+                     this, SLOT(setRouteModelItems(QVector<RouteItem>)) );
             connect( d->m_owncloudBackend, SIGNAL(routeListDownloadProgress(qint64,qint64)),
                      this, SIGNAL(routeListDownloadProgress(qint64,qint64)) );
             d->m_owncloudBackend->downloadRouteList();
         }
     } else {
-        d->m_model->setItems( cachedRouteList() );
+        // If not offline, setRouteModelItems() does this after
+        // appending downloaded items to the list.
+        d->m_model->setItems( d->m_routeList );
     }
-}
-
-void RouteSyncManager::processRouteList( const QVector<RouteItem> &routeList )
-{
-    d->m_model->setItems( routeList );
 }
 
 void RouteSyncManager::downloadRoute( const QString &timestamp )
@@ -199,7 +216,7 @@ void RouteSyncManager::openRoute(const QString &timestamp )
 void RouteSyncManager::deleteRoute(const QString &timestamp )
 {
     if( d->m_cloudSyncManager->backend() == CloudSyncManager::Owncloud ) {
-        connect( d->m_owncloudBackend, SIGNAL(routeDeleted()), this, SLOT(downloadRouteList()) );
+        connect( d->m_owncloudBackend, SIGNAL(routeDeleted()), this, SLOT(prepareRouteList()) );
         d->m_owncloudBackend->deleteRoute( timestamp );
     }
 }
@@ -207,6 +224,7 @@ void RouteSyncManager::deleteRoute(const QString &timestamp )
 void RouteSyncManager::removeRouteFromCache( const QString &timestamp )
 {
     if( d->m_cloudSyncManager->backend() == CloudSyncManager::Owncloud ) {
+        connect( d->m_owncloudBackend, SIGNAL(removedFromCache()), this, SLOT(prepareRouteList()) );
         d->m_owncloudBackend->removeFromCache( d->m_cacheDir, timestamp );
     }
 }
@@ -219,7 +237,37 @@ void RouteSyncManager::updateUploadProgressbar( qint64 sent, qint64 total )
     if( sent == total ) {
         d->m_uploadProgressDialog->accept();
         disconnect( this, SLOT(updateUploadProgressbar(qint64,qint64)) );
+        prepareRouteList();
     }
+}
+
+void RouteSyncManager::setRouteModelItems( const QVector<RouteItem> &routeList )
+{
+    if( d->m_routeList.count() > 0 ) {
+        QStringList cloudRoutes;
+        foreach( const RouteItem &item, routeList ) {
+            cloudRoutes.append( item.identifier() );
+        }
+
+        for( int position = 0; position < d->m_routeList.count(); position++ ) {
+            if( cloudRoutes.contains( d->m_routeList.at( position ).identifier() ) ) {
+                d->m_routeList[ position ].setOnCloud( true );
+            }
+        }
+
+        QStringList cachedRoutes;
+        foreach( const RouteItem &item, d->m_routeList ) {
+            cachedRoutes.append( item.identifier() );
+        }
+
+        foreach( const RouteItem &item, routeList ) {
+            if( !cachedRoutes.contains( item.identifier() ) ) {
+                d->m_routeList.append( item );
+            }
+        }
+    }
+
+    d->m_model->setItems( d->m_routeList );
 }
 
 }

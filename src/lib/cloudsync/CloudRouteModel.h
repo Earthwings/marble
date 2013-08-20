@@ -32,7 +32,8 @@ public:
         Distance,
         Duration,
         IsCached,
-        IsDownloading
+        IsDownloading,
+        IsOnCloud
     };
 
     explicit CloudRouteModel( QObject *parent = 0 );

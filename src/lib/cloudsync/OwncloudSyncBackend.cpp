@@ -264,6 +264,7 @@ void OwncloudSyncBackend::prepareRouteList()
             route.setDistance( iterator.value().property( "distance" ).toString() );
             route.setDuration( iterator.value().property( "duration" ).toString() );
             route.setPreviewUrl( endpointUrl( d->m_routePreviewEndpoint, route.identifier() ) );
+            route.setOnCloud( true );
             
             d->m_routeList.append( route );
         }

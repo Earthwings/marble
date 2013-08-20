@@ -21,6 +21,7 @@ public:
     QUrl m_previewUrl;
     QString m_distance;
     QString m_duration;
+    bool m_onCloud;
 };
 
 RouteItem::RouteItem() : d( new Private() )
@@ -105,6 +106,16 @@ QString RouteItem::duration() const
 void RouteItem::setDuration( const QString &duration )
 {
     d->m_duration = duration;
+}
+
+bool RouteItem::onCloud() const
+{
+    return d->m_onCloud;
+}
+
+void RouteItem::setOnCloud( const bool onCloud )
+{
+    d->m_onCloud = onCloud;
 }
 
 }

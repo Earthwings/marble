@@ -61,16 +61,17 @@ public:
 
 public slots:
     /**
-     * Downloads route list from cloud.
-     * Initiates necessary methods of backends.
+     * Uploads the route with given timestamp.
+     * @param timestamp Timestamp of the route which will be uploaded.
      */
-    void downloadRouteList();
+    void uploadRoute( const QString &timestamp );
 
     /**
-     * Forwards the route list to CloudRouteModel
-     * @param routeList Downloaded route list
+     * Starts preparing a route list by downloading
+     * a list of the routes on the cloud and adding
+     * the ones on the
      */
-    void processRouteList( const QVector<RouteItem> &routeList );
+    void prepareRouteList();
 
     /**
      * Starts the download of specified route.
@@ -103,6 +104,15 @@ public slots:
      * @param total Total bytes.
      */
     void updateUploadProgressbar( qint64 sent, qint64 total );
+
+private slots:
+    /**
+     * Appends downloaded route list to RouteSyncManager's private list
+     * and then forwards the list to CloudRouteModel
+     * @param routeList Downloaded route list
+     */
+    void setRouteModelItems( const QVector<RouteItem> &routeList );
+
 
 signals:
     void routeDownloadProgress( qint64 received, qint64 total );

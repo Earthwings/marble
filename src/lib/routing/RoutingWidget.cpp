@@ -694,7 +694,7 @@ void RoutingWidget::uploadToCloud()
 
 void RoutingWidget::openCloudRoutesDialog()
 {
-    d->m_routeSyncManager->downloadRouteList();
+    d->m_routeSyncManager->prepareRouteList();
 
     CloudRoutesDialog *dialog = new CloudRoutesDialog( d->m_routeSyncManager->model(), d->m_widget );
     connect( d->m_routeSyncManager, SIGNAL(routeListDownloadProgress(qint64,qint64)), dialog, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
@@ -702,6 +702,7 @@ void RoutingWidget::openCloudRoutesDialog()
     connect( dialog, SIGNAL(openButtonClicked(QString)), d->m_routeSyncManager, SLOT(openRoute(QString)) );
     connect( dialog, SIGNAL(deleteButtonClicked(QString)), d->m_routeSyncManager, SLOT(deleteRoute(QString)) );
     connect( dialog, SIGNAL(removeFromCacheButtonClicked(QString)), d->m_routeSyncManager, SLOT(removeRouteFromCache(QString)) );
+    connect( dialog, SIGNAL(uploadToCloudButtonClicked(QString)), d->m_routeSyncManager, SLOT(uploadRoute(QString)) );
     dialog->exec();
 }
 

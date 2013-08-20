@@ -38,6 +38,7 @@ CloudRoutesDialog::CloudRoutesDialog( CloudRouteModel *model, QWidget *parent ) 
     connect( delegate, SIGNAL(openButtonClicked(QString)), this, SIGNAL(openButtonClicked(QString)) );
     connect( delegate, SIGNAL(deleteButtonClicked(QString)), this, SIGNAL(deleteButtonClicked(QString)) );
     connect( delegate, SIGNAL(removeFromCacheButtonClicked(QString)), this, SIGNAL(removeFromCacheButtonClicked(QString)) );
+    connect( delegate, SIGNAL(uploadToCloudButtonClicked(QString)), this, SIGNAL(uploadToCloudButtonClicked(QString)) );
     connect( d->m_model, SIGNAL(modelReset()), this, SLOT(updateNoRouteLabel()) );
 
     d->progressBar->setHidden( true );

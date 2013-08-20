@@ -45,6 +45,9 @@ public:
     QString duration() const;
     void setDuration( const QString &duration );
 
+    bool onCloud() const;
+    void setOnCloud( const bool onCloud );
+
 private:
     class Private;
     Private *d;

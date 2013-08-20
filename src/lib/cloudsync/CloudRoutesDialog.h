@@ -37,6 +37,7 @@ signals:
     void openButtonClicked( QString timestamp );
     void deleteButtonClicked( QString timestamp );
     void removeFromCacheButtonClicked( QString timestamp );
+    void uploadToCloudButtonClicked( QString timestamp );
 
 private:
     class Private;

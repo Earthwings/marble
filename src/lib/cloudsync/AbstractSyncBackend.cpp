@@ -58,6 +58,8 @@ void AbstractSyncBackend::removeFromCache( const QDir &cacheDir, const QString &
         mDebug() << "Failed to remove locally cached route " << timestamp << ". It might "
                     "have been removed already, or its directory is missing / not writable.";
     }
+
+    emit removedFromCache();
 }
 
 }
