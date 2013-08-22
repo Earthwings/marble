@@ -51,7 +51,7 @@ public:
     void removeFromCache( const QDir &cacheDir, const QString &timestamp );
 
 signals:
-    void removedFromCache();
+    void removedFromCache( const QString &timestamp );
 
 private:
     class Private;

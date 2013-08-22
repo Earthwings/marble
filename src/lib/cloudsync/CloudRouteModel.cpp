@@ -73,7 +73,6 @@ QVariant CloudRouteModel::data( const QModelIndex& index, int role ) const
 
 int CloudRouteModel::rowCount( const QModelIndex &parent ) const
 {
-    Q_UNUSED( parent )
     return parent.isValid() ? 0 : d->m_items.count();
 }
 
@@ -139,10 +138,10 @@ void CloudRouteModel::setPreview( QNetworkReply *reply )
         return;
     }
 
-    RouteItem *route = &( d->m_items[ position ] );
+    RouteItem &route = d->m_items[ position ];
     QIcon icon( QPixmap::fromImage( QImage::fromData( reply->readAll() ) ) );
-    route->setPreview( icon );
-    d->m_requestedPreviews.remove( route->identifier() );
+    route.setPreview( icon );
+    d->m_requestedPreviews.remove( route.identifier() );
 }
 
 void CloudRouteModel::updateProgress( qint64 currentSize, qint64 totalSize )

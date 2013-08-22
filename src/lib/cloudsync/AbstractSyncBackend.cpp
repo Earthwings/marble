@@ -59,7 +59,7 @@ void AbstractSyncBackend::removeFromCache( const QDir &cacheDir, const QString &
                     "have been removed already, or its directory is missing / not writable.";
     }
 
-    emit removedFromCache();
+    emit removedFromCache( timestamp );
 }
 
 }
