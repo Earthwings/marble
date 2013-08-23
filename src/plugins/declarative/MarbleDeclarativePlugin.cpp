@@ -31,6 +31,7 @@
 #include "AbstractFloatItem.h"
 #include "RenderPlugin.h"
 #include "DeclarativeDataPlugin.h"
+#include "CloudSync.h"
 
 #include <qdeclarative.h>
 #include <QDeclarativeEngine>
@@ -50,6 +51,7 @@ void MarbleDeclarativePlugin::registerTypes( const char * )
     qmlRegisterType<Search>( uri, 0, 11, "Search" );
     qmlRegisterType<RouteRequestModel>( uri, 0, 11, "RouteRequestModel" );
     qmlRegisterType<Settings>( uri, 0, 11, "Settings" );
+    qmlRegisterType<CloudSync>( uri, 0, 11, "CloudSync" );
 
     qmlRegisterType<MarbleWidget>( uri, 0, 11, "MarbleWidget" );
     qmlRegisterType<MapThemeManager>( uri, 0, 11, "MapThemeManager" );
