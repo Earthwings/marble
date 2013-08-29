@@ -14,6 +14,7 @@
 #include "MarbleDeclarativeWidget.h"
 #include "cloudsync/RouteSyncManager.h"
 #include "cloudsync/CloudRouteModel.h"
+#include "cloudsync/CloudSyncManager.h"
 
 class CloudSync::Private
 {
@@ -23,12 +24,14 @@ public:
     MarbleWidget *m_map;
     Marble::CloudRouteModel *m_routeModel;
     Marble::RouteSyncManager *m_routeSyncManager;
+    Marble::CloudSyncManager m_cloudSyncManager;
 };
 
 CloudSync::Private::Private() :
     m_map( 0 ),
     m_routeModel( 0 ),
-    m_routeSyncManager( 0 )
+    m_routeSyncManager( 0 ),
+    m_cloudSyncManager()
 {
 }
 
@@ -37,14 +40,15 @@ CloudSync::CloudSync( QObject *parent ) : QObject( parent ),
 {
 }
 
-QObject* CloudSync::routeModel()
+CloudSync::~CloudSync()
 {
-    return d->m_routeModel;
+    delete d;
 }
 
-void CloudSync::setRouteModel( QObject *model )
+QObject* CloudSync::routeModel()
 {
-    d->m_routeModel = qobject_cast<Marble::CloudRouteModel*>( model );
+    return d->m_routeSyncManager ? qobject_cast<Marble::CloudRouteModel*>
+                                   ( d->m_routeSyncManager->model() ) : 0;
 }
 
 MarbleWidget* CloudSync::map()
@@ -54,10 +58,44 @@ MarbleWidget* CloudSync::map()
 
 void CloudSync::setMap( MarbleWidget *map )
 {
+    if( d->m_map != map ) {
     d->m_map = map;
-    delete d->m_routeSyncManager;
-    d->m_routeSyncManager = new Marble::RouteSyncManager( d->m_map->model()->cloudSyncManager(),
-                                                          d->m_map->model()->routingManager() );
+        delete d->m_routeSyncManager;
+        d->m_routeSyncManager = new Marble::RouteSyncManager( &d->m_cloudSyncManager,
+                                                              d->m_map->model()->routingManager() );
+        d->m_routeSyncManager->prepareRouteList();
+        emit mapChanged();
+    }
+}
+
+QString CloudSync::owncloudServer()
+{
+    return d->m_cloudSyncManager.owncloudServer();
+}
+
+void CloudSync::setOwncloudServer( const QString &server )
+{
+    d->m_cloudSyncManager.setOwncloudServer( server );
+}
+
+QString CloudSync::owncloudUsername()
+{
+    return d->m_cloudSyncManager.owncloudUsername();
+}
+
+void CloudSync::setOwncloudUsername( const QString &username )
+{
+    d->m_cloudSyncManager.setOwncloudUsername( username );
+}
+
+QString CloudSync::owncloudPassword()
+{
+    return d->m_cloudSyncManager.owncloudPassword();
+}
+
+void CloudSync::setOwncloudPassword( const QString &password )
+{
+    d->m_cloudSyncManager.setOwncloudPassword( password );
 }
 
 void CloudSync::uploadRoute()
@@ -67,24 +105,36 @@ void CloudSync::uploadRoute()
     }
 }
 
-void CloudSync::downloadRoute( const QString &timestamp )
-{
+void CloudSync::uploadRoute( const QString &identifier ) {
     if( d->m_routeSyncManager != 0 ) {
-        d->m_routeSyncManager->downloadRoute( timestamp );
+        d->m_routeSyncManager->uploadRoute( identifier );
     }
 }
 
-void CloudSync::removeRouteFromDevice( const QString &timestamp )
-{
+void CloudSync::openRoute( const QString &identifier ) {
     if( d->m_routeSyncManager != 0 ) {
-        d->m_routeSyncManager->removeRouteFromCache( timestamp );
+        d->m_routeSyncManager->openRoute( identifier );
     }
 }
 
-void CloudSync::deleteRouteFromCloud( const QString &timestamp )
+void CloudSync::downloadRoute( const QString &identifier )
 {
     if( d->m_routeSyncManager != 0 ) {
-        d->m_routeSyncManager->deleteRoute( timestamp );
+        d->m_routeSyncManager->downloadRoute( identifier );
+    }
+}
+
+void CloudSync::removeRouteFromDevice( const QString &identifier )
+{
+    if( d->m_routeSyncManager != 0 ) {
+        d->m_routeSyncManager->removeRouteFromCache( identifier );
+    }
+}
+
+void CloudSync::deleteRouteFromCloud( const QString &identifier )
+{
+    if( d->m_routeSyncManager != 0 ) {
+        d->m_routeSyncManager->deleteRoute( identifier );
     }
 }
 

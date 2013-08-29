@@ -16,6 +16,7 @@
 #include "MarbleDeclarativeWidget.h"
 #include "PositionSource.h"
 #include "Bookmarks.h"
+#include "CloudSync.h"
 #include "Tracking.h"
 #include "Routing.h"
 #include "Navigation.h"
@@ -31,7 +32,6 @@
 #include "AbstractFloatItem.h"
 #include "RenderPlugin.h"
 #include "DeclarativeDataPlugin.h"
-#include "CloudSync.h"
 
 #include <qdeclarative.h>
 #include <QDeclarativeEngine>
@@ -49,9 +49,9 @@ void MarbleDeclarativePlugin::registerTypes( const char * )
     qmlRegisterType<Routing>( uri, 0, 11, "Routing" );
     qmlRegisterType<Navigation>( uri, 0, 11, "Navigation" );
     qmlRegisterType<Search>( uri, 0, 11, "Search" );
+    qmlRegisterType<CloudSync>( uri, 0, 11, "CloudSync" );
     qmlRegisterType<RouteRequestModel>( uri, 0, 11, "RouteRequestModel" );
     qmlRegisterType<Settings>( uri, 0, 11, "Settings" );
-    qmlRegisterType<CloudSync>( uri, 0, 11, "CloudSync" );
 
     qmlRegisterType<MarbleWidget>( uri, 0, 11, "MarbleWidget" );
     qmlRegisterType<MapThemeManager>( uri, 0, 11, "MapThemeManager" );
