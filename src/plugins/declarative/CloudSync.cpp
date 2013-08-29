@@ -35,9 +35,16 @@ CloudSync::Private::Private() :
 {
 }
 
-CloudSync::CloudSync( QObject *parent ) : QObject( parent ),
+CloudSync::CloudSync( QObject *parent ) :
+    QObject( parent ),
     d( new Private() )
 {
+    connect( &d->m_cloudSyncManager, SIGNAL(owncloudServerChanged(QString)),
+             this, SIGNAL(owncloudServerChanged()) );
+    connect( &d->m_cloudSyncManager, SIGNAL(owncloudUsernameChanged(QString)),
+             this, SIGNAL(owncloudUsernameChanged()) );
+    connect( &d->m_cloudSyncManager, SIGNAL(owncloudPasswordChanged(QString)),
+             this, SIGNAL(owncloudPasswordChanged()) );
 }
 
 CloudSync::~CloudSync()
