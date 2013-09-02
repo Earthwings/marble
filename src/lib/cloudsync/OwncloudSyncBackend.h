@@ -35,12 +35,16 @@ public:
     QPixmap createPreview( const QString &timestamp );
     QString routeName( const QString &timestamp );
 
+    void updateBookmarks();
+    void downloadBookmarks();
+
 public slots:
     void cancelUpload();
 
 private slots:
     void prepareRouteList();
     void saveDownloadedRoute();
+    void saveDownloadedBookmarks();
 
 signals:
     void routeListDownloaded( const QVector<RouteItem> &routeList );
@@ -49,6 +53,10 @@ signals:
     void routeUploadProgress( qint64 sent, qint64 total );
     void routeDownloadProgress( qint64 received, qint64 total );
     void routeListDownloadProgress( qint64 received, qint64 total );
+    void bookmarksUpdateProgress( qint64 sent, qint64 total );
+    void bookmarksDownloadProgress( qint64 received, qint64 total );
+    void bookmarksUpdated();
+    void bookmarksDownloaded();
     
 private:
     class Private;

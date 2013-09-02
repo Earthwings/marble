@@ -245,6 +245,7 @@ set(marblewidget_SRCS
     cloudsync/CloudRoutesDialog.cpp
     cloudsync/RouteItem.cpp
     cloudsync/RouteItemDelegate.cpp
+    cloudsync/BookmarkSyncManager.cpp
 )
 
 set (marblewidget_UI
