@@ -9,18 +9,19 @@
 //
 
 #include "OwncloudSyncBackend.h"
-#include "CloudRouteModel.h"
+
 #include "MarbleDirs.h"
-#include "MarbleDebug.h"
-#include "MarbleWidget.h"
 #include "MarbleModel.h"
+#include "MarbleDebug.h"
+#include "GeoDocument.h"
+#include "MarbleWidget.h"
 #include "RenderPlugin.h"
 #include "RoutingModel.h"
-#include "RoutingManager.h"
-#include "GeoDocument.h"
-#include "GeoDataFolder.h"
-#include "GeoDataDocument.h"
 #include "GeoDataParser.h"
+#include "GeoDataFolder.h"
+#include "RoutingManager.h"
+#include "GeoDataDocument.h"
+#include "CloudRouteModel.h"
 #include "GeoDataPlacemark.h"
 
 #include <QNetworkAccessManager>
@@ -41,14 +42,11 @@ class OwncloudSyncBackend::Private {
         Private();
 
         QDir m_cacheDir;
-        QFile *m_bookmarksFile;
         QNetworkAccessManager m_network;
         QNetworkReply *m_routeUploadReply;
         QNetworkReply *m_routeListReply;
         QNetworkReply *m_routeDownloadReply;
         QNetworkReply *m_routeDeleteReply;
-        QNetworkReply *m_bookmarksUpdateReply;
-        QNetworkReply *m_bookmarksDownloadReply;
 
         QVector<RouteItem> m_routeList;
 
@@ -57,13 +55,10 @@ class OwncloudSyncBackend::Private {
         QString m_routeDownloadEndpoint;
         QString m_routeDeleteEndpoint;
         QString m_routePreviewEndpoint;
-        QString m_bookmarksUpdateEndpoint;
-        QString m_bookmarksDownloadEndpoint;
 };
 
 OwncloudSyncBackend::Private::Private() :
     m_cacheDir( MarbleDirs::localPath() + "/cloudsync/cache/routes/" ),
-    m_bookmarksFile( new QFile( MarbleDirs::localPath() + "/bookmarks/bookmarks.kml" ) ),
     m_network(),
     m_routeUploadReply(),
     m_routeListReply(),
@@ -75,9 +70,7 @@ OwncloudSyncBackend::Private::Private() :
     m_routeListEndpoint( "routes" ),
     m_routeDownloadEndpoint( "routes" ),
     m_routeDeleteEndpoint( "routes/delete" ),
-    m_routePreviewEndpoint( "routes/preview" ),
-    m_bookmarksUpdateEndpoint( "bookmarks/update" ),
-    m_bookmarksDownloadEndpoint( "bookmarks/kml" )
+    m_routePreviewEndpoint( "routes/preview" )
 {
 }
 
@@ -244,46 +237,6 @@ QString OwncloudSyncBackend::routeName( const QString &timestamp )
     return routeName.left( routeName.length() - 3 );
 }
 
-void OwncloudSyncBackend::updateBookmarks()
-{
-    QString word = "----MarbleCloudBoundary";
-    QString boundary = QString( "--%0" ).arg( word );
-    QNetworkRequest request( endpointUrl( d->m_bookmarksUpdateEndpoint ) );
-    request.setHeader( QNetworkRequest::ContentTypeHeader, QString( "multipart/form-data; boundary=%0" ).arg( word ) );
-
-    QByteArray data;
-    data.append( QString( boundary + "\r\n" ).toUtf8() );
-
-    data.append( QString( "Content-Disposition: form-data; name=\"bookmarks\"; filename=\"bookmarks.kml\"" ).toUtf8() );
-    data.append( "\r\n" );
-    data.append( "Content-Type: application/vnd.google-earth.kml+xml" );
-    data.append( "\r\n\r\n" );
-
-    if( !d->m_bookmarksFile->open( QFile::ReadOnly ) ) {
-        mDebug() << "Failed to open file" << d->m_bookmarksFile->fileName() << "for writing."
-                 <<  " It either is missing or is not readable.";
-        return;
-    }
-
-    data.append( d->m_bookmarksFile->readAll() );
-    data.append( "\r\n" );
-    data.append( QString( boundary + "\r\n" ).toUtf8() );
-
-    d->m_bookmarksFile->close();
-    d->m_bookmarksUpdateReply = d->m_network.post( request, data );
-    connect( d->m_bookmarksUpdateReply, SIGNAL(uploadProgress(qint64,qint64)), this, SIGNAL(bookmarksUpdateProgress(qint64,qint64)) );
-    connect( d->m_bookmarksUpdateReply, SIGNAL(finished()), this, SIGNAL(bookmarksUpdated()) );
-}
-
-void OwncloudSyncBackend::downloadBookmarks()
-{
-    QUrl url( endpointUrl( d->m_bookmarksDownloadEndpoint ) );
-    QNetworkRequest request( url );
-    d->m_bookmarksDownloadReply = d->m_network.get( request );
-    connect( d->m_bookmarksDownloadReply, SIGNAL(downloadProgress(qint64,qint64)), this, SIGNAL(bookmarksDownloadProgress(qint64,qint64)) );
-    connect( d->m_bookmarksDownloadReply, SIGNAL(finished()), this, SLOT(saveDownloadedBookmarks()) );
-}
-
 void OwncloudSyncBackend::cancelUpload()
 {
     d->m_routeUploadReply->abort();
@@ -370,20 +323,6 @@ void OwncloudSyncBackend::saveDownloadedRoute()
     previewFile.close();
 
     emit routeDownloaded();
-}
-
-void OwncloudSyncBackend::saveDownloadedBookmarks()
-{
-    QByteArray bookmarks = d->m_bookmarksDownloadReply->readAll();
-    bool fileOpened = d->m_bookmarksFile->open( QFile::ReadWrite );
-    if( fileOpened ) {
-        d->m_bookmarksFile->write( bookmarks );
-        d->m_bookmarksFile->close();
-        emit bookmarksDownloaded();
-    } else {
-        mDebug() << "Failed to open file" << d->m_bookmarksFile->fileName() << "for writing."
-                 <<  " It either is missing or is not writable.";
-    }
 }
 
 }

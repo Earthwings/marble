@@ -38,6 +38,7 @@
 #include <QMouseEvent>
 #include <QToolBar>
 #include <QToolButton>
+#include <BookmarkSyncManager.h>
 
 #include "ui_RoutingWidget.h"
 
@@ -686,16 +687,19 @@ void RoutingWidget::uploadToCloud()
 
 void RoutingWidget::openCloudRoutesDialog()
 {
-    d->m_routeSyncManager->prepareRouteList();
+    BookmarkSyncManager *manager = new BookmarkSyncManager( d->m_widget->model()->cloudSyncManager() );
+    manager->startBookmarkSync();
 
-    CloudRoutesDialog *dialog = new CloudRoutesDialog( d->m_routeSyncManager->model(), d->m_widget );
-    connect( d->m_routeSyncManager, SIGNAL(routeListDownloadProgress(qint64,qint64)), dialog, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
-    connect( dialog, SIGNAL(downloadButtonClicked(QString)), d->m_routeSyncManager, SLOT(downloadRoute(QString)) );
-    connect( dialog, SIGNAL(openButtonClicked(QString)), d->m_routeSyncManager, SLOT(openRoute(QString)) );
-    connect( dialog, SIGNAL(deleteButtonClicked(QString)), d->m_routeSyncManager, SLOT(deleteRoute(QString)) );
-    connect( dialog, SIGNAL(removeFromCacheButtonClicked(QString)), d->m_routeSyncManager, SLOT(removeRouteFromCache(QString)) );
-    connect( dialog, SIGNAL(uploadToCloudButtonClicked(QString)), d->m_routeSyncManager, SLOT(uploadRoute(QString)) );
-    dialog->exec();
+//    d->m_routeSyncManager->prepareRouteList();
+
+//    CloudRoutesDialog *dialog = new CloudRoutesDialog( d->m_routeSyncManager->model(), d->m_widget );
+//    connect( d->m_routeSyncManager, SIGNAL(routeListDownloadProgress(qint64,qint64)), dialog, SLOT(updateListDownloadProgressbar(qint64,qint64)) );
+//    connect( dialog, SIGNAL(downloadButtonClicked(QString)), d->m_routeSyncManager, SLOT(downloadRoute(QString)) );
+//    connect( dialog, SIGNAL(openButtonClicked(QString)), d->m_routeSyncManager, SLOT(openRoute(QString)) );
+//    connect( dialog, SIGNAL(deleteButtonClicked(QString)), d->m_routeSyncManager, SLOT(deleteRoute(QString)) );
+//    connect( dialog, SIGNAL(removeFromCacheButtonClicked(QString)), d->m_routeSyncManager, SLOT(removeRouteFromCache(QString)) );
+//    connect( dialog, SIGNAL(uploadToCloudButtonClicked(QString)), d->m_routeSyncManager, SLOT(uploadRoute(QString)) );
+//    dialog->exec();
 }
 
 void RoutingWidget::indicateRoutingFailure( GeoDataDocument* route )
