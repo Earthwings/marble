@@ -70,52 +70,110 @@ private:
     void downloadBookmarks();
 
     /**
-     * Gets cloud bookmarks' timestamp from cloud.
+     * Gets cloud bookmarks.kml's timestamp from cloud.
      */
     void downloadTimestamp();
 
     /**
-     * Compares cloud bookmarks.kml to last synced bookmarks.kml.
+     * Compares cloud bookmarks.kml's timestamp to last synced bookmarks.kml's timestamp.
      * @return true if cloud one is different from last synced one.
      */
-    bool cloudBookmarksModified();
+    bool cloudBookmarksModified( const QString &cloudTimestamp );
 
     /**
-     * Removes all KMLs with timestamps except the
+     * Removes all KMLs in the cache except the
      * one with yougnest timestamp.
      */
     void clearCache();
 
+    /**
+     * Finds the last synced bookmarks.kml file and returns its path
+     * @return Path of last synced bookmarks.kml file.
+     */
     QString lastSyncedKmlPath();
 
+    /**
+     * Gets all placemarks in a document as DiffItems, compares them to another document and puts the result in a list.
+     * @param document The document whose placemarks will be compared to another document's placemarks.
+     * @param other The document whose placemarks will be compared to the first document's placemarks.
+     * @param diffDirection Direction of comparison, e.g. must be DiffItem::Destination if direction is source to destination.
+     * @return A list of DiffItems
+     */
     QList<DiffItem> getPlacemarks(GeoDataDocument *document, GeoDataDocument *other, DiffItem::Status diffDirection );
 
+    /**
+     * Gets all placemarks in a document as DiffItems, compares them to another document and puts the result in a list.
+     * @param folder The folder whose placemarks will be compared to another document's placemarks.
+     * @param path Path of the folder.
+     * @param other The document whose placemarks will be compared to the first document's placemarks.
+     * @param diffDirection Direction of comparison, e.g. must be DiffItem::Destination if direction is source to destination.
+     * @return A list of DiffItems
+     */
     QList<DiffItem> getPlacemarks( GeoDataFolder *folder, QString &path, GeoDataDocument *other, DiffItem::Status diffDirection );
 
+    /**
+     * Finds the placemark which has the same coordinates with given bookmark
+     * @param container Container of placemarks which will be compared. Can be document or folder.
+     * @param bookmark The bookmark whose counterpart will be searched in the container.
+     * @return Counterpart of the given placemark.
+     */
     GeoDataPlacemark* findPlacemark( GeoDataContainer* container, const GeoDataPlacemark &bookmark ) const;
 
-    void findCounterpart( DiffItem &item, GeoDataDocument* document );
+    /**
+     * Determines the status (created, deleted, changed or unchanged) of given DiffItem
+     * by comparing the item's placemark with placemarks of given GeoDataDocument.
+     * @param item The item whose status will be determined.
+     * @param document The document whose placemarks will be used to determine DiffItem's status.
+     */
+    void determineDiffStatus( DiffItem &item, GeoDataDocument* document );
 
     /**
-     * Finds differences between two bookmark files
+     * Finds differences between two bookmark files.
      * @param sourcePath Source bookmark
      * @param destinationPath Destination bookmark
      * @return A list of differences
      */
     QList<DiffItem> diff( QString &sourcePath, QString &destinationPath );
 
-    void merge( QList<DiffItem> diffListA, QList<DiffItem> diffListB );
+    /**
+     * Merges two diff lists.
+     * @param diffListA First diff list.
+     * @param diffListB Second diff list.
+     * @return Merged DiffItems.
+     */
+    QList<DiffItem> merge( QList<DiffItem> &diffListA, QList<DiffItem> &diffListB );
+
+    /**
+     * Creates GeoDataFolders using strings in path list.
+     * @param container Container which created GeoDataFolder will be attached to.
+     * @param pathList Names of folders. Note that each item will be the child of the previous one.
+     * @return A pointer to created folder.
+     */
+    GeoDataFolder* createFolders( GeoDataContainer *container, QStringList &pathList );
+
+    /**
+     * Creates a GeoDataDocument using a list of DiffItems.
+     * @param mergedList DiffItems which will be used as placemarks.
+     * @return A pointer to created document.
+     */
+    GeoDataDocument* constructDocument( const QList<DiffItem> &mergedList );
 
 private slots:
-    void saveDownloaded( QNetworkReply* reply );
-    void saveUploadedAsSynced( QNetworkReply* reply );
-    void parseTimestamp( QNetworkReply* reply );
+    void saveDownloadedToCache( const QByteArray &kml );
+    void saveUploadedAsSynced();
+    void parseTimestamp();
     void copyLocalToCache( const QString &timestamp );
+
+    // Bookmark synchronization steps, not intended for other uses
+
+    void continueSynchronization( const QString &cloudTimestamp );
+    void completeSynchronization();
 
 signals:
     void uploadProgress( qint64 sent, qint64 total );
     void downloadProgress( qint64 received, qint64 total );
     void timestampDownloaded( const QString &timestamp );
+    void bookmarksDownloaded();
 
 private:
     class Private;
