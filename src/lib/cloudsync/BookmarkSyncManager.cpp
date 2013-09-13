@@ -80,8 +80,8 @@ BookmarkSyncManager::~BookmarkSyncManager()
 
 void BookmarkSyncManager::startBookmarkSync()
 {
-    connect( this, SIGNAL(timestampDownloaded(QString)),
-             this, SLOT(continueSynchronization(QString)) );
+    connect( this, SIGNAL(timestampDownloaded()),
+             this, SLOT(continueSynchronization()) );
     downloadTimestamp();
 }
 
@@ -113,7 +113,7 @@ void BookmarkSyncManager::uploadBookmarks()
     connect( d->m_uploadReply, SIGNAL(uploadProgress(qint64,qint64)),
              this, SIGNAL(uploadProgress(qint64,qint64)) );
     connect( d->m_uploadReply, SIGNAL(finished()),
-             this, SLOT(saveUploadedAsSynced()) );
+             this, SLOT(completeUpload()) );
 }
 
 void BookmarkSyncManager::downloadBookmarks()
@@ -156,9 +156,13 @@ void BookmarkSyncManager::clearCache()
                 QStringList() << "*.kml",
                 QDir::NoFilter, QDir::Name );
     if( !fileInfoList.isEmpty() ) {
-        fileInfoList.removeLast();
         foreach ( QFileInfo fileInfo, fileInfoList ) {
-            QFile( fileInfo.absolutePath() ).remove();
+            QFile file( fileInfo.absoluteFilePath() );
+            bool removed = file.remove();
+            if( !removed ) {
+                mDebug() << "Could not delete" << file.fileName() <<
+                         "Make sure you have sufficient permissions.";
+            }
         }
     }
 }
@@ -418,16 +422,7 @@ void BookmarkSyncManager::saveDownloadedToCache( const QByteArray &kml )
 
     bookmarksFile.write( kml );
     bookmarksFile.close();
-    copyLocalToCache( d->m_cloudTimestamp );
-}
-
-void BookmarkSyncManager::saveUploadedAsSynced()
-{
-    QScriptEngine engine;
-    QString timestampResponse = d->m_uploadReply->readAll();
-    QScriptValue parsedResponse = engine.evaluate( QString( "(%0)" ).arg( timestampResponse ) );
-    QScriptValue timestamp = parsedResponse.property( "data" );
-    copyLocalToCache( timestamp.toString() );
+    copyLocalToCache();
 }
 
 void BookmarkSyncManager::parseTimestamp()
@@ -436,22 +431,22 @@ void BookmarkSyncManager::parseTimestamp()
     QScriptEngine engine;
     QScriptValue parsedResponse = engine.evaluate( QString( "(%0)" ).arg( response ) );
     QString timestamp = parsedResponse.property( "data" ).toString();
-    emit timestampDownloaded( timestamp );
+    d->m_cloudTimestamp = timestamp;
+    emit timestampDownloaded();
 }
-void BookmarkSyncManager::copyLocalToCache( const QString &timestamp )
+void BookmarkSyncManager::copyLocalToCache()
 {
     QDir().mkpath( d->m_cachePath );
     clearCache();
 
     QFile bookmarksFile( d->m_localBookmarksPath );
-    bookmarksFile.copy( QString( "%0/%1.kml" ).arg( d->m_cachePath, timestamp ) );
+    bookmarksFile.copy( QString( "%0/%1.kml" ).arg( d->m_cachePath, d->m_cloudTimestamp ) );
 }
 
 // Bookmark synchronization steps
-void BookmarkSyncManager::continueSynchronization( const QString &cloudTimestamp )
+void BookmarkSyncManager::continueSynchronization()
 {
-    d->m_cloudTimestamp = cloudTimestamp;
-    bool cloudModified = cloudBookmarksModified( cloudTimestamp );
+    bool cloudModified = cloudBookmarksModified( d->m_cloudTimestamp );
     if( !cloudModified ) {
         QString lastSyncedPath = lastSyncedKmlPath();
         if( lastSyncedPath == QString() ) {
@@ -478,6 +473,11 @@ void BookmarkSyncManager::continueSynchronization( const QString &cloudTimestamp
 
 void BookmarkSyncManager::completeSynchronization()
 {
+    // Timestamp might get updated so we should prevent
+    // this method from getting called for no reason.
+    disconnect( this, SIGNAL(timestampDownloaded()),
+             this, SLOT(continueSynchronization()) );
+
     QString lastSyncedPath = lastSyncedKmlPath();
     QFile localBookmarksFile( d->m_localBookmarksPath );
     QByteArray result = d->m_downloadReply->readAll();
@@ -500,20 +500,6 @@ void BookmarkSyncManager::completeSynchronization()
         QList<DiffItem> diffB = diff( lastSyncedPath, tempName );
         QList<DiffItem> merged = merge( diffA, diffB );
         GeoDataDocument *doc = constructDocument( merged );
-        qDebug() << "----- diffA -----";
-        foreach( DiffItem item, diffA ) {
-            qDebug() << item.m_action << item.m_path << item.m_placemarkA.name();
-        }
-
-        qDebug() << "----- diffB -----";
-        foreach( DiffItem item, diffB ) {
-            qDebug() << item.m_action << item.m_path << item.m_placemarkA.name();
-        }
-
-        qDebug() << "----- merge -----";
-        foreach( DiffItem item, merged ) {
-            qDebug() << item.m_action << item.m_path << item.m_placemarkA.name();
-        }
 
         GeoWriter writer;
         localBookmarksFile.remove();
@@ -521,8 +507,13 @@ void BookmarkSyncManager::completeSynchronization()
         writer.write( &localBookmarksFile, doc );
         uploadBookmarks();
     }
+}
 
-    d->m_cloudTimestamp = QString();
+void BookmarkSyncManager::completeUpload()
+{
+    connect( this, SIGNAL(timestampDownloaded()),
+             this, SLOT(copyLocalToCache()) );
+    downloadTimestamp();
 }
 
 }

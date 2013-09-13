@@ -160,19 +160,19 @@ private:
 
 private slots:
     void saveDownloadedToCache( const QByteArray &kml );
-    void saveUploadedAsSynced();
     void parseTimestamp();
-    void copyLocalToCache( const QString &timestamp );
+    void copyLocalToCache();
 
     // Bookmark synchronization steps, not intended for other uses
 
-    void continueSynchronization( const QString &cloudTimestamp );
+    void continueSynchronization();
     void completeSynchronization();
+    void completeUpload();
 
 signals:
     void uploadProgress( qint64 sent, qint64 total );
     void downloadProgress( qint64 received, qint64 total );
-    void timestampDownloaded( const QString &timestamp );
+    void timestampDownloaded();
     void bookmarksDownloaded();
 
 private:
