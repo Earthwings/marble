@@ -53,6 +53,7 @@ public slots:
     void downloadRoute( const QString &identifier );
     void removeRouteFromDevice( const QString &identifier );
     void deleteRouteFromCloud( const QString &identifier );
+    void syncBookmarks();
 
 signals:
     void mapChanged();
