@@ -168,7 +168,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonSync">
+      <widget class="QPushButton" name="button_syncNow">
        <property name="text">
         <string>Sync now</string>
        </property>

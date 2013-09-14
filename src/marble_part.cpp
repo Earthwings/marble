@@ -94,6 +94,7 @@
 #include "MarbleWidgetInputHandler.h"
 #include "Planet.h"
 #include "MapThemeDownloadDialog.h"
+#include "cloudsync/BookmarkSyncManager.h"
 
 // Marble non-library classes
 #include "ControlView.h"
@@ -352,6 +353,12 @@ void MarblePart::showStatusBar( bool isChecked )
         return;
 
     m_statusBarExtension->statusBar()->setVisible( isChecked );
+}
+
+void MarblePart::syncBookmarks()
+{
+    BookmarkSyncManager *manager = new BookmarkSyncManager( m_controlView->marbleWidget()->model()->cloudSyncManager() );
+    manager->startBookmarkSync();
 }
 
 void MarblePart::controlSun()
@@ -1383,6 +1390,9 @@ void MarblePart::editSettings()
     w_cloudSyncSettings->setObjectName( "sync_page" );
     ui_cloudSyncSettings.setupUi( w_cloudSyncSettings );
     m_configDialog->addPage( w_cloudSyncSettings, i18n( "Synchronization" ), "folder-sync" );
+
+    connect( ui_cloudSyncSettings.button_syncNow, SIGNAL(clicked()),
+             this, SLOT(syncBookmarks()) );
     
     // routing page
     RoutingProfilesWidget *w_routingSettings = new RoutingProfilesWidget( m_controlView->marbleModel() );

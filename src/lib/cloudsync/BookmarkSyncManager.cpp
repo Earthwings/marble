@@ -22,7 +22,6 @@
 #include "OwncloudSyncBackend.h"
 
 #include <QFile>
-#include <QDebug>
 #include <QBuffer>
 #include <QScriptValue>
 #include <QScriptEngine>

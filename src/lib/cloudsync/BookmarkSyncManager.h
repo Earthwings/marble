@@ -12,6 +12,7 @@
 #define BOOKMARKSYNCMANAGER_H
 
 #include "GeoDataPlacemark.h"
+#include "marble_export.h"
 
 #include <QObject>
 #include <QNetworkReply>
@@ -45,7 +46,7 @@ public:
     GeoDataPlacemark m_placemarkB;
 };
 
-class BookmarkSyncManager : public QObject
+class MARBLE_EXPORT BookmarkSyncManager : public QObject
 {
     Q_OBJECT
 
