@@ -91,7 +91,6 @@ void BookmarkSyncManager::startBookmarkSync()
 
 void BookmarkSyncManager::uploadBookmarks()
 {
-    qDebug() << "uploading";
     QByteArray data;
     QByteArray lineBreak = "\r\n";
     QString word = "----MarbleCloudBoundary";
@@ -110,7 +109,8 @@ void BookmarkSyncManager::uploadBookmarks()
         return;
     }
 
-    data.append( bookmarksFile.readAll() + lineBreak + lineBreak );
+    QByteArray kmlContent = bookmarksFile.readAll();
+    data.append( kmlContent + lineBreak + lineBreak );
     data.append( QString( boundary ).toUtf8() );
     bookmarksFile.close();
 
@@ -468,14 +468,10 @@ void BookmarkSyncManager::parseTimestamp()
     QScriptValue parsedResponse = engine.evaluate( QString( "(%0)" ).arg( response ) );
     QString timestamp = parsedResponse.property( "data" ).toString();
     d->m_cloudTimestamp = timestamp;
-    qDebug() << "timestamp " << d->m_cloudTimestamp;
     emit timestampDownloaded();
 }
 void BookmarkSyncManager::copyLocalToCache()
 {
-    disconnect( this, SIGNAL(timestampDownloaded()),
-             this, SLOT(copyLocalToCache()) );
-
     QDir().mkpath( d->m_cachePath );
     clearCache();
 
@@ -487,11 +483,6 @@ void BookmarkSyncManager::copyLocalToCache()
 // Bookmark synchronization steps
 void BookmarkSyncManager::continueSynchronization()
 {
-    // Timestamp might get updated in the future. This prevents
-    // timestampDownloaded() calling it unnecessarily.
-    disconnect( this, SIGNAL(timestampDownloaded()),
-             this, SLOT(continueSynchronization()) );
-
     bool cloudModified = cloudBookmarksModified( d->m_cloudTimestamp );
     if( !cloudModified ) {
         QString lastSyncedPath = lastSyncedKmlPath();
@@ -527,7 +518,6 @@ void BookmarkSyncManager::completeSynchronization()
         if( localBookmarksFile.exists() ) {
             // Conflict here!
         } else {
-            qDebug() << "saving dl to cache";
             saveDownloadedToCache( result );
         }
     } else {
@@ -546,21 +536,24 @@ void BookmarkSyncManager::completeSynchronization()
 
 void BookmarkSyncManager::completeMerge()
 {
-    qDebug() << "completing merge";
     QFile localBookmarksFile( d->m_localBookmarksPath );
     GeoDataDocument *doc = constructDocument( d->m_merged );
     GeoWriter writer;
     localBookmarksFile.remove();
     localBookmarksFile.open( QFile::ReadWrite );
     writer.write( &localBookmarksFile, doc );
+    localBookmarksFile.close();
     uploadBookmarks();
 }
 
 void BookmarkSyncManager::completeUpload()
 {
-    connect( this, SIGNAL(timestampDownloaded()),
-             this, SLOT(copyLocalToCache()) );
-    downloadTimestamp();
+    QString response = d->m_uploadReply->readAll();
+    QScriptEngine engine;
+    QScriptValue parsedResponse = engine.evaluate( QString( "(%0)" ).arg( response ) );
+    QString timestamp = parsedResponse.property( "data" ).toString();
+    d->m_cloudTimestamp = timestamp;
+    copyLocalToCache();
 }
 
 }

@@ -63,6 +63,8 @@ void ConflictDialog::open()
 
 void ConflictDialog::resolveConflict( QAbstractButton *button )
 {
+    accept();
+
     QDialogButtonBox::StandardButton standardButton = m_box->standardButton( button );
     switch(standardButton) {
     case QDialogButtonBox::Cancel:
@@ -93,8 +95,6 @@ void ConflictDialog::resolveConflict( QAbstractButton *button )
            break;
        }
     }
-
-    accept();
 }
 
 void ConflictDialog::prepareLayout()
@@ -141,8 +141,8 @@ void ConflictDialog::prepareLayout()
     detailLayout->addLayout( rightLayout );
 
     QLabel *descriptionLabel = new QLabel();
-    QString descriptionText = tr( "A bookmark on this device conflicts" \
-                                  "with a cloud bookmark. Which one do" \
+    QString descriptionText = tr( "A bookmark on this device conflicts " \
+                                  "with a cloud bookmark. Which one do " \
                                   "you want to keep?" );
     descriptionLabel->setText( descriptionText );
 
