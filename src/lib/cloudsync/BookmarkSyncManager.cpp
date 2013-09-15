@@ -91,6 +91,7 @@ void BookmarkSyncManager::startBookmarkSync()
 
 void BookmarkSyncManager::uploadBookmarks()
 {
+    qDebug() << "uploading";
     QByteArray data;
     QByteArray lineBreak = "\r\n";
     QString word = "----MarbleCloudBoundary";
@@ -429,8 +430,6 @@ void BookmarkSyncManager::resolveConflict( MergeItem *item )
         if( !d->m_diffA.isEmpty() ) {
             diffItem = d->m_diffA.first();
             break;
-        } else {
-            return;
         }
     case MergeItem::B:
         diffItem = d->m_conflictItem;
@@ -440,7 +439,9 @@ void BookmarkSyncManager::resolveConflict( MergeItem *item )
     }
 
     d->m_merged.append( diffItem );
-    d->m_diffA.removeFirst();
+    if( !d->m_diffA.isEmpty() ) {
+        d->m_diffA.removeFirst();
+    }
     merge();
 }
 
@@ -467,6 +468,7 @@ void BookmarkSyncManager::parseTimestamp()
     QScriptValue parsedResponse = engine.evaluate( QString( "(%0)" ).arg( response ) );
     QString timestamp = parsedResponse.property( "data" ).toString();
     d->m_cloudTimestamp = timestamp;
+    qDebug() << "timestamp " << d->m_cloudTimestamp;
     emit timestampDownloaded();
 }
 void BookmarkSyncManager::copyLocalToCache()
@@ -479,6 +481,7 @@ void BookmarkSyncManager::copyLocalToCache()
 
     QFile bookmarksFile( d->m_localBookmarksPath );
     bookmarksFile.copy( QString( "%0/%1.kml" ).arg( d->m_cachePath, d->m_cloudTimestamp ) );
+    emit syncComplete();
 }
 
 // Bookmark synchronization steps
@@ -524,6 +527,7 @@ void BookmarkSyncManager::completeSynchronization()
         if( localBookmarksFile.exists() ) {
             // Conflict here!
         } else {
+            qDebug() << "saving dl to cache";
             saveDownloadedToCache( result );
         }
     } else {
@@ -542,6 +546,7 @@ void BookmarkSyncManager::completeSynchronization()
 
 void BookmarkSyncManager::completeMerge()
 {
+    qDebug() << "completing merge";
     QFile localBookmarksFile( d->m_localBookmarksPath );
     GeoDataDocument *doc = constructDocument( d->m_merged );
     GeoWriter writer;

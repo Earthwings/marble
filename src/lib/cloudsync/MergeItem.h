@@ -11,13 +11,16 @@
 #ifndef MERGEITEM_H
 #define MERGEITEM_H
 
+#include "marble_export.h"
+#include "GeoDataPlacemark.h"
+
 #include <QString>
 
 namespace Marble {
 
 class GeoDataPlacemark;
 
-class MergeItem
+class MARBLE_EXPORT MergeItem
 {
 
 public:
@@ -45,8 +48,11 @@ public:
     void setResolution( MergeItem::Resolution resolution );
 
 private:
-    class Private;
-    Private *d;
+    QString m_pathA;
+    QString m_pathB;
+    GeoDataPlacemark m_placemarkA;
+    GeoDataPlacemark m_placemarkB;
+    MergeItem::Resolution m_resolution;
 
 };
 

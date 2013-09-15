@@ -37,6 +37,7 @@ namespace Marble
 class CurrentLocationWidget;
 class BookmarkSyncManager;
 class MapThemeManager;
+class ConflictDialog;
 class MarbleModel;
 class MergeItem;
 
@@ -140,6 +141,7 @@ private Q_SLOTS:
     QDockWidget       *m_searchDock;
     CurrentLocationWidget* m_locationWidget;
     BookmarkSyncManager *m_bookmarkSyncManager;
+    ConflictDialog *m_conflictDialog;
     QTimer *m_syncTimer;
 };
 

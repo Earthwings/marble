@@ -21,9 +21,85 @@
 
 namespace Marble {
 
-ConflictDialog::ConflictDialog(MergeItem *mergeItem, QWidget *parent ) : QDialog( parent )
+ConflictDialog::ConflictDialog( QWidget *parent ) :
+    QDialog( parent ),
+    m_mergeItem( 0 ),
+    m_box( 0 )
 {
-    m_mergeItem = mergeItem;
+    m_autoResolve = ConflictDialog::Manual;
+}
+
+void ConflictDialog::setMergeItem( MergeItem *item )
+{
+    m_mergeItem = item;
+}
+
+void ConflictDialog::stopAutoResolve()
+{
+    m_autoResolve = ConflictDialog::Manual;
+}
+
+void ConflictDialog::open()
+{
+    if( m_mergeItem == 0 ) {
+        return;
+    }
+
+    switch( m_autoResolve ) {
+    case ConflictDialog::Manual:
+        prepareLayout();
+        QDialog::open();
+        break;
+    case ConflictDialog::PreferLocal:
+        m_mergeItem->setResolution( MergeItem::A );
+        emit resolveConflict( m_mergeItem );
+        break;
+    case ConflictDialog::PreferCloud:
+        m_mergeItem->setResolution( MergeItem::B );
+        emit resolveConflict( m_mergeItem );
+        break;
+    }
+}
+
+void ConflictDialog::resolveConflict( QAbstractButton *button )
+{
+    QDialogButtonBox::StandardButton standardButton = m_box->standardButton( button );
+    switch(standardButton) {
+    case QDialogButtonBox::Cancel:
+        break;
+
+    case QDialogButtonBox::NoButton:
+       int actionRole = button->property( "ActionRole" ).toInt();
+       switch( actionRole ) {
+       case ConflictDialog::Local:
+           m_mergeItem->setResolution( MergeItem::A );
+           emit resolveConflict( m_mergeItem );
+           break;
+       case ConflictDialog::Cloud:
+           m_mergeItem->setResolution( MergeItem::B );
+           emit resolveConflict( m_mergeItem );
+           break;
+       case ConflictDialog::AllLocal:
+           m_mergeItem->setResolution( MergeItem::A );
+           m_autoResolve = ConflictDialog::PreferLocal;
+           emit resolveConflict( m_mergeItem );
+           break;
+       case ConflictDialog::AllCloud:
+           m_mergeItem->setResolution( MergeItem::B );
+           m_autoResolve = ConflictDialog::PreferCloud;
+           emit resolveConflict( m_mergeItem );
+           break;
+      default:
+           break;
+       }
+    }
+
+    accept();
+}
+
+void ConflictDialog::prepareLayout()
+{
+    delete layout();
     m_box = new QDialogButtonBox( QDialogButtonBox::Cancel );
 
     QPushButton *localButton = new QPushButton( tr( "Use local" ) );
@@ -64,41 +140,22 @@ ConflictDialog::ConflictDialog(MergeItem *mergeItem, QWidget *parent ) : QDialog
     detailLayout->addLayout( leftLayout );
     detailLayout->addLayout( rightLayout );
 
+    QLabel *descriptionLabel = new QLabel();
+    QString descriptionText = tr( "A bookmark on this device conflicts" \
+                                  "with a cloud bookmark. Which one do" \
+                                  "you want to keep?" );
+    descriptionLabel->setText( descriptionText );
+
     QVBoxLayout *mainLayout = new QVBoxLayout();
+    mainLayout->addWidget( descriptionLabel );
     mainLayout->addLayout( detailLayout );
     mainLayout->addWidget( m_box );
 
+    setLayout( mainLayout );
+    setWindowTitle( tr( "Synchronization Conflict" ) );
+
     connect( m_box, SIGNAL(clicked(QAbstractButton*)),
-             this, SLOT(resolveConflict(QPushButton*)) );
-}
-
-void ConflictDialog::resolveConflict( QPushButton *button )
-{
-    QDialogButtonBox::StandardButton standardButton = m_box->standardButton( button );
-    switch(standardButton) {
-    case QDialogButtonBox::Cancel:
-        break;
-
-    case QDialogButtonBox::NoButton:
-       int actionRole = button->property( "ActionRole" ).toInt();
-       switch( actionRole ) {
-       case ConflictDialog::Local:
-           m_mergeItem->setResolution( MergeItem::A );
-           emit conflictResolved( m_mergeItem );
-           break;
-       case ConflictDialog::Cloud:
-           m_mergeItem->setResolution( MergeItem::B );
-           emit conflictResolved( m_mergeItem );
-           break;
-       case ConflictDialog::AllLocal:
-           break;
-       case ConflictDialog::AllCloud:
-           break;
-      default:
-           break;
-       }
-
-    }
+             this, SLOT(resolveConflict(QAbstractButton*)) );
 }
 
 }

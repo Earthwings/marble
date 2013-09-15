@@ -31,17 +31,31 @@ public:
         AllCloud
     };
 
-    ConflictDialog( MergeItem *mergeItem, QWidget *parent = 0 );
+    enum AutoResolve {
+        Manual,
+        PreferLocal,
+        PreferCloud
+    };
+
+    ConflictDialog( QWidget *parent = 0 );
+    void setMergeItem( MergeItem *item );
+
+public slots:
+    void open();
+    void stopAutoResolve();
 
 signals:
-    void conflictResolved( MergeItem *mergeItem );
+    void resolveConflict( MergeItem *mergeItem );
 
 private slots:
-    void resolveConflict(QPushButton *button );
+    void resolveConflict( QAbstractButton *button );
 
 private:
+    void prepareLayout();
+
     MergeItem *m_mergeItem;
     QDialogButtonBox *m_box;
+    ConflictDialog::AutoResolve m_autoResolve;
 };
 
 }

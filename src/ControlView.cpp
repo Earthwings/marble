@@ -82,6 +82,8 @@ ControlView::ControlView( QWidget *parent )
     layout->addWidget( m_marbleWidget );
     layout->setMargin( 0 );
     setLayout( layout );
+
+    m_conflictDialog = new ConflictDialog( m_marbleWidget );
 }
 
 ControlView::~ControlView()
@@ -621,14 +623,10 @@ void ControlView::showSearch()
     m_searchDock->widget()->setFocus();
 }
 
-void ControlView::showConflictDialog(MergeItem *item )
+void ControlView::showConflictDialog( MergeItem *item )
 {
-    ConflictDialog *dialog = new ConflictDialog( item );
-    if( m_bookmarkSyncManager != 0 ) {
-        connect( dialog, SIGNAL(conflictResolved(MergeItem*)),
-                 m_bookmarkSyncManager, SLOT(resolveConflict(MergeItem*)) );
-    }
-    dialog->exec();
+    m_conflictDialog->setMergeItem( item );
+    m_conflictDialog->open();
 }
 
 void ControlView::syncBookmarks()
@@ -637,10 +635,14 @@ void ControlView::syncBookmarks()
         m_bookmarkSyncManager = new BookmarkSyncManager( m_marbleWidget->model()->cloudSyncManager() );
     }
 
-    m_bookmarkSyncManager->startBookmarkSync();
     connect( m_bookmarkSyncManager, SIGNAL(mergeConflict(MergeItem*)),
              this, SLOT(showConflictDialog(MergeItem*)) );
+    connect( m_bookmarkSyncManager, SIGNAL(syncComplete()),
+             m_conflictDialog, SLOT(stopAutoResolve()) );
+    connect( m_conflictDialog, SIGNAL(resolveConflict(MergeItem*)),
+             m_bookmarkSyncManager, SLOT(resolveConflict(MergeItem*)) );
     connect( m_syncTimer, SIGNAL(timeout()), m_bookmarkSyncManager, SLOT(startBookmarkSync()) );
+    m_bookmarkSyncManager->startBookmarkSync();
 
     if( !m_syncTimer->isActive() ) {
         m_syncTimer->start( 3600000 ); // 1 hour. TODO: Make this configurable.
