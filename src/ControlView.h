@@ -35,8 +35,10 @@ namespace Marble
 {
 
 class CurrentLocationWidget;
+class BookmarkSyncManager;
 class MapThemeManager;
 class MarbleModel;
+class MergeItem;
 
 class ControlView : public QWidget
 {
@@ -91,6 +93,10 @@ class ControlView : public QWidget
 
     void setWorkOffline( bool workOffline );
 
+    BookmarkSyncManager* bookmarkSyncManager();
+
+    void syncBookmarks();
+
  public slots:
     void printMapScreenShot( QPointer<QPrintDialog> dialog );
     void printPixmap( QPrinter * printer, const QPixmap& pixmap );
@@ -106,9 +112,11 @@ signals:
     void showMapWizard();
     void showUploadDialog();
     void mapThemeDeleted();
+    void conflictResolved( MergeItem *item );
 
 private Q_SLOTS:
      void showSearch();
+     void showConflictDialog( MergeItem *item );
     
  private:
     /**
@@ -131,6 +139,8 @@ private Q_SLOTS:
     QString            m_externalEditor;
     QDockWidget       *m_searchDock;
     CurrentLocationWidget* m_locationWidget;
+    BookmarkSyncManager *m_bookmarkSyncManager;
+    QTimer *m_syncTimer;
 };
 
 }

@@ -246,6 +246,8 @@ set(marblewidget_SRCS
     cloudsync/RouteItem.cpp
     cloudsync/RouteItemDelegate.cpp
     cloudsync/BookmarkSyncManager.cpp
+    cloudsync/MergeItem.cpp
+    cloudsync/ConflictDialog.cpp
 )
 
 set (marblewidget_UI

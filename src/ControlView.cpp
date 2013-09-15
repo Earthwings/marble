@@ -55,6 +55,9 @@
 #include "MapViewWidget.h"
 #include "FileViewWidget.h"
 #include "LegendWidget.h"
+#include "cloudsync/BookmarkSyncManager.h"
+#include "cloudsync/ConflictDialog.h"
+#include "cloudsync/MergeItem.h"
 
 namespace Marble
 {
@@ -63,7 +66,9 @@ ControlView::ControlView( QWidget *parent )
    : QWidget( parent ),
      m_mapThemeManager( new MapThemeManager( this ) ),
      m_searchDock( 0 ),
-     m_locationWidget( 0 )
+     m_locationWidget( 0 ),
+     m_bookmarkSyncManager( 0 ),
+     m_syncTimer( new QTimer() )
 {
     setWindowTitle( tr( "Marble - Virtual Globe" ) );
 
@@ -585,6 +590,11 @@ void ControlView::setWorkOffline( bool offline )
     }
 }
 
+BookmarkSyncManager* ControlView::bookmarkSyncManager()
+{
+    return m_bookmarkSyncManager;
+}
+
 QString ControlView::externalMapEditor() const
 {
     return m_externalEditor;
@@ -609,6 +619,32 @@ void ControlView::showSearch()
     m_searchDock->show();
     m_searchDock->raise();
     m_searchDock->widget()->setFocus();
+}
+
+void ControlView::showConflictDialog(MergeItem *item )
+{
+    ConflictDialog *dialog = new ConflictDialog( item );
+    if( m_bookmarkSyncManager != 0 ) {
+        connect( dialog, SIGNAL(conflictResolved(MergeItem*)),
+                 m_bookmarkSyncManager, SLOT(resolveConflict(MergeItem*)) );
+    }
+    dialog->exec();
+}
+
+void ControlView::syncBookmarks()
+{
+    if( m_bookmarkSyncManager == 0 ) {
+        m_bookmarkSyncManager = new BookmarkSyncManager( m_marbleWidget->model()->cloudSyncManager() );
+    }
+
+    m_bookmarkSyncManager->startBookmarkSync();
+    connect( m_bookmarkSyncManager, SIGNAL(mergeConflict(MergeItem*)),
+             this, SLOT(showConflictDialog(MergeItem*)) );
+    connect( m_syncTimer, SIGNAL(timeout()), m_bookmarkSyncManager, SLOT(startBookmarkSync()) );
+
+    if( !m_syncTimer->isActive() ) {
+        m_syncTimer->start( 3600000 ); // 1 hour. TODO: Make this configurable.
+    }
 }
 
 }

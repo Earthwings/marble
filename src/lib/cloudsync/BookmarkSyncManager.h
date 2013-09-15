@@ -11,8 +11,9 @@
 #ifndef BOOKMARKSYNCMANAGER_H
 #define BOOKMARKSYNCMANAGER_H
 
-#include "GeoDataPlacemark.h"
+#include "MergeItem.h"
 #include "marble_export.h"
+#include "GeoDataPlacemark.h"
 
 #include <QObject>
 #include <QNetworkReply>
@@ -53,11 +54,6 @@ class MARBLE_EXPORT BookmarkSyncManager : public QObject
 public:
     BookmarkSyncManager( CloudSyncManager *cloudSyncManager );
     ~BookmarkSyncManager();
-
-    /**
-     * Initiates running of synchronization "method chain".
-     */
-    void startBookmarkSync();
 
 private:
     /**
@@ -142,7 +138,7 @@ private:
      * @param diffListB Second diff list.
      * @return Merged DiffItems.
      */
-    QList<DiffItem> merge( QList<DiffItem> &diffListA, QList<DiffItem> &diffListB );
+    void merge();
 
     /**
      * Creates GeoDataFolders using strings in path list.
@@ -159,15 +155,23 @@ private:
      */
     GeoDataDocument* constructDocument( const QList<DiffItem> &mergedList );
 
+public slots:
+    void resolveConflict(MergeItem *item );
+
+    /**
+     * Initiates running of synchronization "method chain".
+     */
+    void startBookmarkSync();
+
 private slots:
     void saveDownloadedToCache( const QByteArray &kml );
     void parseTimestamp();
     void copyLocalToCache();
 
     // Bookmark synchronization steps, not intended for other uses
-
     void continueSynchronization();
     void completeSynchronization();
+    void completeMerge();
     void completeUpload();
 
 signals:
@@ -175,6 +179,8 @@ signals:
     void downloadProgress( qint64 received, qint64 total );
     void timestampDownloaded();
     void bookmarksDownloaded();
+    void mergeConflict( MergeItem *item );
+    void syncComplete();
 
 private:
     class Private;

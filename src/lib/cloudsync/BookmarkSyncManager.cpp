@@ -53,6 +53,11 @@ public:
     QString m_cachePath;
     QString m_localBookmarksPath;
     QString m_bookmarksTimestamp;
+
+    QList<DiffItem> m_diffA;
+    QList<DiffItem> m_diffB;
+    QList<DiffItem> m_merged;
+    DiffItem m_conflictItem;
 };
 
 BookmarkSyncManager::Private::Private( CloudSyncManager *cloudSyncManager ) : m_cloudSyncManager( cloudSyncManager )
@@ -309,17 +314,15 @@ QList<DiffItem> BookmarkSyncManager::diff( QString &sourcePath, QString &destina
     return diffItems;
 }
 
-QList<DiffItem> BookmarkSyncManager::merge( QList<DiffItem> &diffListA, QList<DiffItem> &diffListB )
+void BookmarkSyncManager::merge()
 {
-    QList<DiffItem> mergedList;
-
-    foreach( DiffItem itemA, diffListA ) {
+    foreach( DiffItem itemA, d->m_diffA ) {
         if( itemA.m_action == DiffItem::NoAction ) {
             bool deleted = false;
             bool changed = false;
             DiffItem other;
 
-            foreach( DiffItem itemB, diffListB ) {
+            foreach( DiffItem itemB, d->m_diffB ) {
                 if( distanceSphere( itemA.m_placemarkA.coordinate(), itemB.m_placemarkA.coordinate() ) <= 0.01 ) {
                     if( itemB.m_action == DiffItem::Deleted ) {
                         deleted = true;
@@ -330,18 +333,18 @@ QList<DiffItem> BookmarkSyncManager::merge( QList<DiffItem> &diffListA, QList<Di
                 }
             }
             if( changed ) {
-                mergedList.append( other );
+                d->m_merged.append( other );
             } else if( !deleted ) {
-                mergedList.append( itemA );
+                d->m_merged.append( itemA );
             }
         } else if( itemA.m_action == DiffItem::Created ) {
-            mergedList.append( itemA );
+            d->m_merged.append( itemA );
         } else if( itemA.m_action == DiffItem::Changed ) {
             bool conflict = false;
 
             // Find a better solution than this
             DiffItem other;
-            foreach( DiffItem itemB, diffListB ) {
+            foreach( DiffItem itemB, d->m_diffB ) {
                 if( distanceSphere( itemA.m_placemarkB.coordinate(), itemB.m_placemarkB.coordinate() ) <= 0.01
                         && itemB.m_action == DiffItem::Changed ) {
                     conflict = true;
@@ -350,22 +353,31 @@ QList<DiffItem> BookmarkSyncManager::merge( QList<DiffItem> &diffListA, QList<Di
             }
 
             if( !conflict ) {
-                mergedList.append( itemA );
+                d->m_merged.append( itemA );
             } else {
-                // Emit conflict signal, raise dialogs etc.
-                // Favor B (other) for now.
-                mergedList.append( other );
+                d->m_conflictItem = other;
+                MergeItem *mergeItem = new MergeItem();
+                mergeItem->setPathA( itemA.m_path );
+                mergeItem->setPathB( other.m_path );
+                mergeItem->setPlacemarkA( itemA.m_placemarkA );
+                mergeItem->setPlacemarkB( other.m_placemarkA );
+                emit mergeConflict( mergeItem );
+                return;
             }
         }
-    }
 
-    foreach( DiffItem itemB, diffListB ) {
-        if( itemB.m_action == DiffItem::Created ) {
-            mergedList.append( itemB );
+        if( !d->m_diffA.isEmpty() ) {
+            d->m_diffA.removeFirst();
         }
     }
 
-    return mergedList;
+    foreach( DiffItem itemB, d->m_diffB ) {
+        if( itemB.m_action == DiffItem::Created ) {
+            d->m_merged.append( itemB );
+        }
+    }
+
+    completeMerge();
 }
 
 GeoDataFolder* BookmarkSyncManager::createFolders( GeoDataContainer *container, QStringList &pathList )
@@ -408,6 +420,30 @@ GeoDataDocument* BookmarkSyncManager::constructDocument( const QList<DiffItem> &
     return document;
 }
 
+void BookmarkSyncManager::resolveConflict( MergeItem *item )
+{
+    DiffItem diffItem;
+
+    switch( item->resolution() ) {
+    case MergeItem::A:
+        if( !d->m_diffA.isEmpty() ) {
+            diffItem = d->m_diffA.first();
+            break;
+        } else {
+            return;
+        }
+    case MergeItem::B:
+        diffItem = d->m_conflictItem;
+        break;
+    default:
+        return; // It shouldn't happen.
+    }
+
+    d->m_merged.append( diffItem );
+    d->m_diffA.removeFirst();
+    merge();
+}
+
 void BookmarkSyncManager::saveDownloadedToCache( const QByteArray &kml )
 {
     QString localBookmarksDir = d->m_localBookmarksPath;
@@ -435,6 +471,9 @@ void BookmarkSyncManager::parseTimestamp()
 }
 void BookmarkSyncManager::copyLocalToCache()
 {
+    disconnect( this, SIGNAL(timestampDownloaded()),
+             this, SLOT(copyLocalToCache()) );
+
     QDir().mkpath( d->m_cachePath );
     clearCache();
 
@@ -445,6 +484,11 @@ void BookmarkSyncManager::copyLocalToCache()
 // Bookmark synchronization steps
 void BookmarkSyncManager::continueSynchronization()
 {
+    // Timestamp might get updated in the future. This prevents
+    // timestampDownloaded() calling it unnecessarily.
+    disconnect( this, SIGNAL(timestampDownloaded()),
+             this, SLOT(continueSynchronization()) );
+
     bool cloudModified = cloudBookmarksModified( d->m_cloudTimestamp );
     if( !cloudModified ) {
         QString lastSyncedPath = lastSyncedKmlPath();
@@ -472,11 +516,6 @@ void BookmarkSyncManager::continueSynchronization()
 
 void BookmarkSyncManager::completeSynchronization()
 {
-    // Timestamp might get updated so we should prevent
-    // this method from getting called for no reason.
-    disconnect( this, SIGNAL(timestampDownloaded()),
-             this, SLOT(continueSynchronization()) );
-
     QString lastSyncedPath = lastSyncedKmlPath();
     QFile localBookmarksFile( d->m_localBookmarksPath );
     QByteArray result = d->m_downloadReply->readAll();
@@ -495,17 +534,21 @@ void BookmarkSyncManager::completeSynchronization()
 
         QString tempName = file.fileName();
 
-        QList<DiffItem> diffA = diff( lastSyncedPath, d->m_localBookmarksPath );
-        QList<DiffItem> diffB = diff( lastSyncedPath, tempName );
-        QList<DiffItem> merged = merge( diffA, diffB );
-        GeoDataDocument *doc = constructDocument( merged );
-
-        GeoWriter writer;
-        localBookmarksFile.remove();
-        localBookmarksFile.open( QFile::ReadWrite );
-        writer.write( &localBookmarksFile, doc );
-        uploadBookmarks();
+        d->m_diffA = diff( lastSyncedPath, d->m_localBookmarksPath );
+        d->m_diffB = diff( lastSyncedPath, tempName );
+        merge();
     }
+}
+
+void BookmarkSyncManager::completeMerge()
+{
+    QFile localBookmarksFile( d->m_localBookmarksPath );
+    GeoDataDocument *doc = constructDocument( d->m_merged );
+    GeoWriter writer;
+    localBookmarksFile.remove();
+    localBookmarksFile.open( QFile::ReadWrite );
+    writer.write( &localBookmarksFile, doc );
+    uploadBookmarks();
 }
 
 void BookmarkSyncManager::completeUpload()
