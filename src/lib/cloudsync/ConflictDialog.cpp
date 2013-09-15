@@ -100,6 +100,7 @@ void ConflictDialog::resolveConflict( QAbstractButton *button )
 void ConflictDialog::prepareLayout()
 {
     delete layout();
+    qDeleteAll( children() );
     m_box = new QDialogButtonBox( QDialogButtonBox::Cancel );
 
     QPushButton *localButton = new QPushButton( tr( "Use local" ) );
