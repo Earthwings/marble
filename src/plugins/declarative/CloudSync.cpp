@@ -69,10 +69,18 @@ MarbleWidget* CloudSync::map()
 void CloudSync::setMap( MarbleWidget *map )
 {
     if( d->m_map != map ) {
-    d->m_map = map;
+        d->m_map = map;
+
         delete d->m_routeSyncManager;
-        d->m_routeSyncManager = new Marble::RouteSyncManager( &d->m_cloudSyncManager,
-                                                              d->m_map->model()->routingManager() );
+        d->m_routeSyncManager = new Marble::RouteSyncManager(
+                    &d->m_cloudSyncManager,
+                    d->m_map->model()->routingManager() );
+
+        delete d->m_bookmarkSyncManager;
+        d->m_bookmarkSyncManager = new Marble::BookmarkSyncManager( &d->m_cloudSyncManager );
+        connect( d->m_bookmarkSyncManager, SIGNAL(mergeConflict(MergeItem*)),
+                 this, SIGNAL(mergeConflict(Marble::MergeItem*));
+
         d->m_routeSyncManager->prepareRouteList();
         emit mapChanged();
     }
@@ -152,6 +160,13 @@ void CloudSync::syncBookmarks()
 {
     if( d->m_bookmarkSyncManager != 0 ) {
         d->m_bookmarkSyncManager->startBookmarkSync();
+    }
+}
+
+void CloudSync::resolveConflict( Marble::MergeItem *item )
+{
+    if( d->m_bookmarkSyncManager != 0 ) {
+        d->m_bookmarkSyncManager->resolveConflict( item );
     }
 }
 

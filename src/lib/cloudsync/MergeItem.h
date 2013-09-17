@@ -14,17 +14,25 @@
 #include "marble_export.h"
 #include "GeoDataPlacemark.h"
 
-#include <QString>
+#include <QObject>
 
 namespace Marble {
 
 class GeoDataPlacemark;
 
-class MARBLE_EXPORT MergeItem
+class MARBLE_EXPORT MergeItem : public QObject
 {
+
+    Q_OBJECT
 
 public:
     MergeItem();
+
+    Q_PROPERTY( QString pathA READ pathA WRITE setPathA NOTIFY pathAChanged )
+    Q_PROPERTY( QString pathB READ pathB WRITE setPathB NOTIFY pathBChanged )
+    Q_PROPERTY( GeoDataPlacemark placemarkA READ placemarkA WRITE setPlacemarkA NOTIFY placemarkAChanged )
+    Q_PROPERTY( GeoDataPlacemark placemarkB READ placemarkB WRITE setPlacemarkB NOTIFY placemarkBChanged )
+    Q_PROPERTY( MergeItem::Resolution resolution READ resolution WRITE setResolution NOTIFY resolutionChanged )
 
     enum Resolution {
         None,
@@ -46,6 +54,13 @@ public:
 
     MergeItem::Resolution resolution();
     void setResolution( MergeItem::Resolution resolution );
+
+signals:
+    void pathAChanged();
+    void pathBChanged();
+    void placemarkAChanged();
+    void placemarkBChanged();
+    void resolutionChanged();
 
 private:
     QString m_pathA;

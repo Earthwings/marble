@@ -156,7 +156,7 @@ private:
     GeoDataDocument* constructDocument( const QList<DiffItem> &mergedList );
 
 public slots:
-    void resolveConflict(MergeItem *item );
+    void resolveConflict( MergeItem *item );
 
     /**
      * Initiates running of synchronization "method chain".

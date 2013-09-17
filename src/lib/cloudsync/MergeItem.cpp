@@ -68,3 +68,5 @@ void MergeItem::setResolution( MergeItem::Resolution resolution )
 }
 
 }
+
+#include "MergeItem.moc"
