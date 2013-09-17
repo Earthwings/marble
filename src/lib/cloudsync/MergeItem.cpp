@@ -22,9 +22,11 @@ QString MergeItem::pathA()
 {
     return m_pathA;
 }
+
 void MergeItem::setPathA( const QString &path )
 {
     m_pathA = path;
+    pathAChanged();
 }
 
 QString MergeItem::pathB()
@@ -35,6 +37,7 @@ QString MergeItem::pathB()
 void MergeItem::setPathB( const QString &path )
 {
     m_pathB = path;
+    pathBChanged();
 }
 
 GeoDataPlacemark MergeItem::placemarkA()
@@ -45,6 +48,9 @@ GeoDataPlacemark MergeItem::placemarkA()
 void MergeItem::setPlacemarkA( const GeoDataPlacemark &placemark )
 {
     m_placemarkA = placemark;
+    emit placemarkAChanged();
+    emit nameAChanged();
+    emit descriptionAChanged();
 }
 
 GeoDataPlacemark MergeItem::placemarkB()
@@ -55,6 +61,29 @@ GeoDataPlacemark MergeItem::placemarkB()
 void MergeItem::setPlacemarkB( const GeoDataPlacemark &placemark )
 {
     m_placemarkB = placemark;
+    emit placemarkBChanged();
+    emit nameBChanged();
+    emit descriptionBChanged();
+}
+
+QString MergeItem::nameA()
+{
+    return m_placemarkA.name();
+}
+
+QString MergeItem::nameB()
+{
+    return m_placemarkB.name();
+}
+
+QString MergeItem::descriptionA()
+{
+    return m_placemarkA.description();
+}
+
+QString MergeItem::descriptionB()
+{
+    return m_placemarkB.description();
 }
 
 MergeItem::Resolution MergeItem::resolution()
@@ -65,6 +94,7 @@ MergeItem::Resolution MergeItem::resolution()
 void MergeItem::setResolution( MergeItem::Resolution resolution )
 {
     m_resolution = resolution;
+    emit resolutionChanged();
 }
 
 }

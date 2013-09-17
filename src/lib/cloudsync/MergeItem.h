@@ -32,6 +32,10 @@ public:
     Q_PROPERTY( QString pathB READ pathB WRITE setPathB NOTIFY pathBChanged )
     Q_PROPERTY( GeoDataPlacemark placemarkA READ placemarkA WRITE setPlacemarkA NOTIFY placemarkAChanged )
     Q_PROPERTY( GeoDataPlacemark placemarkB READ placemarkB WRITE setPlacemarkB NOTIFY placemarkBChanged )
+    Q_PROPERTY( QString nameA READ nameA NOTIFY nameAChanged() )
+    Q_PROPERTY( QString nameB READ nameB NOTIFY nameBChanged() )
+    Q_PROPERTY( QString descriptionA READ descriptionA NOTIFY descriptionAChanged() )
+    Q_PROPERTY( QString descriptionB READ descriptionB NOTIFY descriptionBChanged() )
     Q_PROPERTY( MergeItem::Resolution resolution READ resolution WRITE setResolution NOTIFY resolutionChanged )
 
     enum Resolution {
@@ -52,6 +56,12 @@ public:
     GeoDataPlacemark placemarkB();
     void setPlacemarkB( const GeoDataPlacemark &placemark );
 
+    QString nameA();
+    QString nameB();
+
+    QString descriptionA();
+    QString descriptionB();
+
     MergeItem::Resolution resolution();
     void setResolution( MergeItem::Resolution resolution );
 
@@ -60,6 +70,10 @@ signals:
     void pathBChanged();
     void placemarkAChanged();
     void placemarkBChanged();
+    void nameAChanged();
+    void nameBChanged();
+    void descriptionAChanged();
+    void descriptionBChanged();
     void resolutionChanged();
 
 private:
