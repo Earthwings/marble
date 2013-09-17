@@ -549,6 +549,7 @@ void MarblePart::readSettings()
     CloudSyncManager* cloudSyncManager = m_controlView->marbleWidget()->model()->cloudSyncManager();
     cloudSyncManager->setSyncEnabled( MarbleSettings::enableSync() );
     cloudSyncManager->setRouteSyncEnabled( MarbleSettings::syncRoutes() );
+    cloudSyncManager->setBookmarkSyncEnabled( MarbleSettings::syncBookmarks() );
     cloudSyncManager->setOwncloudServer( MarbleSettings::owncloudServer() );
     cloudSyncManager->setOwncloudUsername( MarbleSettings::owncloudUsername() );
     cloudSyncManager->setOwncloudPassword( MarbleSettings::owncloudPassword() );
@@ -1571,6 +1572,7 @@ void MarblePart::updateSettings()
     CloudSyncManager* cloudSyncManager = m_controlView->marbleWidget()->model()->cloudSyncManager();
     cloudSyncManager->setSyncEnabled( MarbleSettings::enableSync() );
     cloudSyncManager->setRouteSyncEnabled( MarbleSettings::syncRoutes() );
+    cloudSyncManager->setBookmarkSyncEnabled( MarbleSettings::syncBookmarks() );
     cloudSyncManager->setOwncloudServer( MarbleSettings::owncloudServer() );
     cloudSyncManager->setOwncloudUsername( MarbleSettings::owncloudUsername() );
     cloudSyncManager->setOwncloudPassword( MarbleSettings::owncloudPassword() );

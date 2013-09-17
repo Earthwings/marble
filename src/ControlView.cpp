@@ -55,6 +55,7 @@
 #include "MapViewWidget.h"
 #include "FileViewWidget.h"
 #include "LegendWidget.h"
+#include "cloudsync/CloudSyncManager.h"
 #include "cloudsync/BookmarkSyncManager.h"
 #include "cloudsync/ConflictDialog.h"
 #include "cloudsync/MergeItem.h"
@@ -635,17 +636,22 @@ void ControlView::syncBookmarks()
         m_bookmarkSyncManager = new BookmarkSyncManager( m_marbleWidget->model()->cloudSyncManager() );
     }
 
-    connect( m_bookmarkSyncManager, SIGNAL(mergeConflict(MergeItem*)),
-             this, SLOT(showConflictDialog(MergeItem*)) );
-    connect( m_bookmarkSyncManager, SIGNAL(syncComplete()),
-             m_conflictDialog, SLOT(stopAutoResolve()) );
-    connect( m_conflictDialog, SIGNAL(resolveConflict(MergeItem*)),
-             m_bookmarkSyncManager, SLOT(resolveConflict(MergeItem*)) );
-    connect( m_syncTimer, SIGNAL(timeout()), m_bookmarkSyncManager, SLOT(startBookmarkSync()) );
-    m_bookmarkSyncManager->startBookmarkSync();
+    bool syncEnabled = m_marbleWidget->model()->cloudSyncManager()->isSyncEnabled()
+            && m_marbleWidget->model()->cloudSyncManager()->isBookmarkSyncEnabled();
 
-    if( !m_syncTimer->isActive() ) {
-        m_syncTimer->start( 3600000 ); // 1 hour. TODO: Make this configurable.
+    if( syncEnabled ) {
+        connect( m_bookmarkSyncManager, SIGNAL(mergeConflict(MergeItem*)),
+                 this, SLOT(showConflictDialog(MergeItem*)) );
+        connect( m_bookmarkSyncManager, SIGNAL(syncComplete()),
+                 m_conflictDialog, SLOT(stopAutoResolve()) );
+        connect( m_conflictDialog, SIGNAL(resolveConflict(MergeItem*)),
+                 m_bookmarkSyncManager, SLOT(resolveConflict(MergeItem*)) );
+        connect( m_syncTimer, SIGNAL(timeout()), m_bookmarkSyncManager, SLOT(startBookmarkSync()) );
+        m_bookmarkSyncManager->startBookmarkSync();
+
+        if( !m_syncTimer->isActive() ) {
+            m_syncTimer->start( 3600000 ); // 1 hour. TODO: Make this configurable.
+        }
     }
 }
 
