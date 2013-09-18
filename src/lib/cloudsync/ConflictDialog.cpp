@@ -67,33 +67,35 @@ void ConflictDialog::resolveConflict( QAbstractButton *button )
 
     QDialogButtonBox::StandardButton standardButton = m_box->standardButton( button );
     switch(standardButton) {
-    case QDialogButtonBox::Cancel:
-        break;
-
     case QDialogButtonBox::NoButton:
-       int actionRole = button->property( "ActionRole" ).toInt();
-       switch( actionRole ) {
-       case ConflictDialog::Local:
-           m_mergeItem->setResolution( MergeItem::A );
-           emit resolveConflict( m_mergeItem );
-           break;
-       case ConflictDialog::Cloud:
-           m_mergeItem->setResolution( MergeItem::B );
-           emit resolveConflict( m_mergeItem );
-           break;
-       case ConflictDialog::AllLocal:
-           m_mergeItem->setResolution( MergeItem::A );
-           m_autoResolve = ConflictDialog::PreferLocal;
-           emit resolveConflict( m_mergeItem );
-           break;
-       case ConflictDialog::AllCloud:
-           m_mergeItem->setResolution( MergeItem::B );
-           m_autoResolve = ConflictDialog::PreferCloud;
-           emit resolveConflict( m_mergeItem );
-           break;
-      default:
-           break;
-       }
+    {
+        int actionRole = button->property( "ActionRole" ).toInt();
+        switch( actionRole ) {
+        case ConflictDialog::Local:
+            m_mergeItem->setResolution( MergeItem::A );
+            emit resolveConflict( m_mergeItem );
+            break;
+        case ConflictDialog::Cloud:
+            m_mergeItem->setResolution( MergeItem::B );
+            emit resolveConflict( m_mergeItem );
+            break;
+        case ConflictDialog::AllLocal:
+            m_mergeItem->setResolution( MergeItem::A );
+            m_autoResolve = ConflictDialog::PreferLocal;
+            emit resolveConflict( m_mergeItem );
+            break;
+        case ConflictDialog::AllCloud:
+            m_mergeItem->setResolution( MergeItem::B );
+            m_autoResolve = ConflictDialog::PreferCloud;
+            emit resolveConflict( m_mergeItem );
+            break;
+        default:
+            break;
+        }
+    }
+
+    default:
+        break;
     }
 }
 
