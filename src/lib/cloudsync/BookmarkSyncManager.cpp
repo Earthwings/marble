@@ -28,6 +28,7 @@
 #include <QTemporaryFile>
 #include <QNetworkAccessManager>
 
+#define EARTH_RADIUS 6378000.0
 
 namespace Marble {
 
@@ -233,7 +234,7 @@ QList<DiffItem> BookmarkSyncManager::getPlacemarks( GeoDataFolder *folder, QStri
 GeoDataPlacemark* BookmarkSyncManager::findPlacemark( GeoDataContainer* container, const GeoDataPlacemark &bookmark ) const
 {
     foreach( GeoDataPlacemark* placemark, container->placemarkList() ) {
-        if ( distanceSphere( placemark->coordinate(), bookmark.coordinate() ) <= 0.01 ) {
+        if ( EARTH_RADIUS * distanceSphere( placemark->coordinate(), bookmark.coordinate() ) <= 1 ) {
             return placemark;
         }
     }
@@ -269,6 +270,7 @@ void BookmarkSyncManager::determineDiffStatus( DiffItem &item, GeoDataDocument *
         switch( item.m_origin ) {
         case DiffItem::Source:
             item.m_action = DiffItem::Deleted;
+            item.m_placemarkB = item.m_placemarkA; // for conflict purposes
             break;
         case DiffItem::Destination:
             item.m_action = DiffItem::Created;
@@ -304,13 +306,16 @@ QList<DiffItem> BookmarkSyncManager::diff( QString &sourcePath, QString &destina
         for( int p = i + 1; p < diffItems.count(); p++ ) {
             if( ( diffItems[i].m_origin == DiffItem::Source )
                     && ( diffItems[i].m_action == DiffItem::NoAction )
-                    && ( distanceSphere( diffItems[i].m_placemarkA.coordinate(), diffItems[p].m_placemarkB.coordinate() ) <= 0.01 )
-                    && ( distanceSphere( diffItems[i].m_placemarkB.coordinate(), diffItems[p].m_placemarkA.coordinate() ) <= 0.01 )
+                    && ( EARTH_RADIUS * distanceSphere( diffItems[i].m_placemarkA.coordinate(), diffItems[p].m_placemarkB.coordinate() ) <= 1 )
+                    && ( EARTH_RADIUS * distanceSphere( diffItems[i].m_placemarkB.coordinate(), diffItems[p].m_placemarkA.coordinate() ) <= 1 )
                     && ( diffItems[i].m_path != diffItems[p].m_path ) ) {
                 diffItems[p].m_action = DiffItem::Changed;
             }
         }
     }
+
+    fileA.close();
+    fileB.close();
 
     return diffItems;
 }
@@ -324,7 +329,7 @@ void BookmarkSyncManager::merge()
             DiffItem other;
 
             foreach( DiffItem itemB, d->m_diffB ) {
-                if( distanceSphere( itemA.m_placemarkA.coordinate(), itemB.m_placemarkA.coordinate() ) <= 0.01 ) {
+                if( EARTH_RADIUS * distanceSphere( itemA.m_placemarkA.coordinate(), itemB.m_placemarkA.coordinate() ) <= 1 ) {
                     if( itemB.m_action == DiffItem::Deleted ) {
                         deleted = true;
                     } else if( itemB.m_action == DiffItem::Changed ) {
@@ -340,28 +345,52 @@ void BookmarkSyncManager::merge()
             }
         } else if( itemA.m_action == DiffItem::Created ) {
             d->m_merged.append( itemA );
-        } else if( itemA.m_action == DiffItem::Changed ) {
+        } else if( itemA.m_action == DiffItem::Changed || itemA.m_action == DiffItem::Deleted ) {
             bool conflict = false;
-
-            // Find a better solution than this
             DiffItem other;
+
             foreach( DiffItem itemB, d->m_diffB ) {
-                if( distanceSphere( itemA.m_placemarkB.coordinate(), itemB.m_placemarkB.coordinate() ) <= 0.01
-                        && itemB.m_action == DiffItem::Changed ) {
-                    conflict = true;
-                    other = itemB;
+                if( EARTH_RADIUS * distanceSphere( itemA.m_placemarkB.coordinate(), itemB.m_placemarkB.coordinate() ) <= 1 ) {
+                    if( ( itemA.m_action == DiffItem::Changed && ( itemB.m_action == DiffItem::Changed || itemB.m_action == DiffItem::Deleted ) )
+                            || ( itemA.m_action == DiffItem::Deleted && itemB.m_action == DiffItem::Changed ) ) {
+                        conflict = true;
+                        other = itemB;
+                    }
                 }
             }
 
-            if( !conflict ) {
+            if( !conflict && itemA.m_action == DiffItem::Changed ) {
                 d->m_merged.append( itemA );
-            } else {
+            } else if ( conflict ) {
                 d->m_conflictItem = other;
                 MergeItem *mergeItem = new MergeItem();
                 mergeItem->setPathA( itemA.m_path );
                 mergeItem->setPathB( other.m_path );
                 mergeItem->setPlacemarkA( itemA.m_placemarkA );
                 mergeItem->setPlacemarkB( other.m_placemarkA );
+
+                switch( itemA.m_action ) {
+                case DiffItem::Changed:
+                    mergeItem->setActionA( MergeItem::Changed );
+                    break;
+                case DiffItem::Deleted:
+                    mergeItem->setActionA( MergeItem::Deleted );
+                    break;
+                default:
+                    break;
+                }
+
+                switch( other.m_action ) {
+                case DiffItem::Changed:
+                    mergeItem->setActionB( MergeItem::Changed );
+                    break;
+                case DiffItem::Deleted:
+                    mergeItem->setActionB( MergeItem::Deleted );
+                    break;
+                default:
+                    break;
+                }
+
                 emit mergeConflict( mergeItem );
                 return;
             }
@@ -438,10 +467,14 @@ void BookmarkSyncManager::resolveConflict( MergeItem *item )
         return; // It shouldn't happen.
     }
 
-    d->m_merged.append( diffItem );
+    if( diffItem.m_action != DiffItem::Deleted ) {
+        d->m_merged.append( diffItem );
+    }
+
     if( !d->m_diffA.isEmpty() ) {
         d->m_diffA.removeFirst();
     }
+
     merge();
 }
 
@@ -527,6 +560,10 @@ void BookmarkSyncManager::completeSynchronization()
         file.close();
 
         QString tempName = file.fileName();
+
+        d->m_diffA.clear();
+        d->m_diffB.clear();
+        d->m_merged.clear();
 
         d->m_diffA = diff( lastSyncedPath, d->m_localBookmarksPath );
         d->m_diffB = diff( lastSyncedPath, tempName );

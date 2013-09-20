@@ -36,12 +36,19 @@ public:
     Q_PROPERTY( QString nameB READ nameB NOTIFY nameBChanged() )
     Q_PROPERTY( QString descriptionA READ descriptionA NOTIFY descriptionAChanged() )
     Q_PROPERTY( QString descriptionB READ descriptionB NOTIFY descriptionBChanged() )
+    Q_PROPERTY( MergeItem::Action actionA READ actionA WRITE setActionA NOTIFY actionAChanged )
+    Q_PROPERTY( MergeItem::Action actionB READ actionB WRITE setActionB NOTIFY actionBChanged )
     Q_PROPERTY( MergeItem::Resolution resolution READ resolution WRITE setResolution NOTIFY resolutionChanged )
 
     enum Resolution {
         None,
         A,
         B
+    };
+
+    enum Action {
+        Changed,
+        Deleted
     };
 
     QString pathA();
@@ -62,6 +69,12 @@ public:
     QString descriptionA();
     QString descriptionB();
 
+    MergeItem::Action actionA();
+    void setActionA( MergeItem::Action action );
+
+    MergeItem::Action actionB();
+    void setActionB( MergeItem::Action action );
+
     MergeItem::Resolution resolution();
     void setResolution( MergeItem::Resolution resolution );
 
@@ -74,6 +87,8 @@ signals:
     void nameBChanged();
     void descriptionAChanged();
     void descriptionBChanged();
+    void actionAChanged();
+    void actionBChanged();
     void resolutionChanged();
 
 private:
@@ -81,6 +96,8 @@ private:
     QString m_pathB;
     GeoDataPlacemark m_placemarkA;
     GeoDataPlacemark m_placemarkB;
+    MergeItem::Action m_actionA;
+    MergeItem::Action m_actionB;
     MergeItem::Resolution m_resolution;
 
 };

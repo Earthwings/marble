@@ -86,6 +86,26 @@ QString MergeItem::descriptionB()
     return m_placemarkB.description();
 }
 
+MergeItem::Action MergeItem::actionA()
+{
+    return m_actionA;
+}
+
+void MergeItem::setActionA( MergeItem::Action action )
+{
+    m_actionA = action;
+}
+
+MergeItem::Action MergeItem::actionB()
+{
+    return m_actionB;
+}
+
+void MergeItem::setActionB( MergeItem::Action action )
+{
+    m_actionB = action;
+}
+
 MergeItem::Resolution MergeItem::resolution()
 {
     return m_resolution;

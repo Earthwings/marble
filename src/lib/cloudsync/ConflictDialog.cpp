@@ -123,8 +123,19 @@ void ConflictDialog::prepareLayout()
 
     QVBoxLayout *leftLayout = new QVBoxLayout();
     QString localHeaderText = tr( "Local placemark" );
-    QString localDetailText = tr( "Path: %0 <br /> Name: %1" )
-            .arg( m_mergeItem->pathA(), m_mergeItem->placemarkA().name() );
+    QString localDetailText = tr( "Path: %0 <br /> Name: %1 <br /> Description: %2 <br /> Status: %3" )
+            .arg( m_mergeItem->pathA(), m_mergeItem->nameA(), m_mergeItem->descriptionA() );
+    switch( m_mergeItem->actionA() ) {
+    case MergeItem::Changed:
+        localDetailText = localDetailText.arg( tr( "Changed" ) );
+        break;
+    case MergeItem::Deleted:
+        localDetailText = localDetailText.arg( tr( "Deleted" ) );
+        break;
+    default:
+        break;
+    }
+
     QLabel *localHeaderLabel = new QLabel( localHeaderText );
     QLabel *localDetailLabel = new QLabel( localDetailText );
     leftLayout->addWidget( localHeaderLabel );
@@ -132,8 +143,18 @@ void ConflictDialog::prepareLayout()
 
     QVBoxLayout *rightLayout = new QVBoxLayout();
     QString cloudHeaderText = tr( "Cloud placemark" );
-    QString cloudDetailText = tr( "Path: %0 <br /> Name: %1" )
-            .arg( m_mergeItem->pathB(), m_mergeItem->placemarkB().name() );
+    QString cloudDetailText = tr( "Path: %0 <br /> Name: %1 <br /> Description: %2 <br /> Status: %3" )
+            .arg( m_mergeItem->pathB(), m_mergeItem->nameB(), m_mergeItem->descriptionB() );
+    switch( m_mergeItem->actionB() ) {
+    case MergeItem::Changed:
+        cloudDetailText = cloudDetailText.arg( tr( "Changed" ) );
+        break;
+    case MergeItem::Deleted:
+        cloudDetailText = cloudDetailText.arg( tr( "Deleted" ) );
+        break;
+    default:
+        break;
+    }
     QLabel *cloudHeaderLabel = new QLabel( cloudHeaderText );
     QLabel *cloudDetailLabel = new QLabel( cloudDetailText );
     rightLayout->addWidget( cloudHeaderLabel );
