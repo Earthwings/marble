@@ -1392,6 +1392,7 @@ void MarblePart::editSettings()
 
     w_cloudSyncSettings->setObjectName( "sync_page" );
     ui_cloudSyncSettings.setupUi( w_cloudSyncSettings );
+    ui_cloudSyncSettings.button_syncNow->setEnabled( MarbleSettings::syncBookmarks() );
     m_configDialog->addPage( w_cloudSyncSettings, i18n( "Synchronization" ), "folder-sync" );
 
     connect( ui_cloudSyncSettings.button_syncNow, SIGNAL(clicked()),
