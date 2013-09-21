@@ -78,7 +78,7 @@ void CloudSync::setMap( MarbleWidget *map )
 
         delete d->m_bookmarkSyncManager;
         d->m_bookmarkSyncManager = new Marble::BookmarkSyncManager( &d->m_cloudSyncManager );
-        connect( d->m_bookmarkSyncManager, SIGNAL(mergeConflict(MergeItem*)),
+        connect( d->m_bookmarkSyncManager, SIGNAL(mergeConflict(Marble::MergeItem*)),
                  this, SIGNAL(mergeConflict(Marble::MergeItem*)));
 
         d->m_routeSyncManager->prepareRouteList();

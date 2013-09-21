@@ -186,7 +186,7 @@ signals:
     void downloadProgress( qint64 received, qint64 total );
     void timestampDownloaded();
     void bookmarksDownloaded();
-    void mergeConflict( MergeItem *item );
+    void mergeConflict( Marble::MergeItem *item );
     void syncComplete();
 
 private:
