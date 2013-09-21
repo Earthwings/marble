@@ -360,7 +360,7 @@ void MarblePart::showStatusBar( bool isChecked )
 
 void MarblePart::syncBookmarksManually()
 {
-    m_controlView->bookmarkSyncManager()->startBookmarkSync();
+    m_controlView->syncBookmarks();
 }
 
 void MarblePart::controlSun()

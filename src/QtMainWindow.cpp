@@ -80,6 +80,7 @@
 #include "MarbleWidgetInputHandler.h"
 #include "Planet.h"
 #include "cloudsync/CloudSyncManager.h"
+#include "cloudsync/BookmarkSyncManager.h"
 
 namespace
 {
@@ -122,6 +123,8 @@ MainWindow::MainWindow(const QString& marbleDataPath, const QVariantMap& cmdLine
              m_controlView->marbleWidget(), SLOT(clearVolatileTileCache()) );
     connect( m_configDialog, SIGNAL(clearPersistentCacheClicked()),
              m_controlView->marbleModel(), SLOT(clearPersistentTileCache()) );
+    connect( m_configDialog, SIGNAL(syncNowClicked()),
+             this, SLOT(syncBookmarksManually()) );
 
     // Load bookmark file. If it does not exist, a default one will be used.
     m_controlView->marbleModel()->bookmarkManager()->loadFile( "bookmarks/bookmarks.kml" );
@@ -146,6 +149,8 @@ MainWindow::MainWindow(const QString& marbleDataPath, const QVariantMap& cmdLine
     QMetaObject::invokeMethod(this,
                               "initObject", Qt::QueuedConnection,
                               Q_ARG(QVariantMap, cmdLineSettings));
+
+    m_controlView->syncBookmarks();
 }
 
 void MainWindow::addGeoDataFile( const QString &fileName )
@@ -1416,6 +1421,11 @@ void MainWindow::showZoomLevel(bool show)
 void MainWindow::fallBackToDefaultTheme()
 {
     m_controlView->marbleWidget()->setMapThemeId( m_controlView->defaultMapThemeId() );
+}
+
+void MainWindow::syncBookmarksManually()
+{
+    m_controlView->syncBookmarks();
 }
 
 #include "QtMainWindow.moc"
