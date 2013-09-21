@@ -55,6 +55,7 @@
 #include "MapViewWidget.h"
 #include "FileViewWidget.h"
 #include "LegendWidget.h"
+#include "BookmarkManager.h"
 #include "cloudsync/CloudSyncManager.h"
 #include "cloudsync/BookmarkSyncManager.h"
 #include "cloudsync/ConflictDialog.h"
@@ -624,6 +625,11 @@ void ControlView::showSearch()
     m_searchDock->widget()->setFocus();
 }
 
+void ControlView::reloadBookmarks()
+{
+    m_marbleWidget->model()->bookmarkManager()->loadFile( "bookmarks/bookmarks.kml" );
+}
+
 void ControlView::showConflictDialog( MergeItem *item )
 {
     m_conflictDialog->setMergeItem( item );
@@ -644,6 +650,8 @@ void ControlView::syncBookmarks()
                  this, SLOT(showConflictDialog(MergeItem*)) );
         connect( m_bookmarkSyncManager, SIGNAL(syncComplete()),
                  m_conflictDialog, SLOT(stopAutoResolve()) );
+        connect( m_bookmarkSyncManager, SIGNAL(syncComplete()),
+                 this, SLOT(reloadBookmarks()) );
         connect( m_conflictDialog, SIGNAL(resolveConflict(MergeItem*)),
                  m_bookmarkSyncManager, SLOT(resolveConflict(MergeItem*)) );
         connect( m_syncTimer, SIGNAL(timeout()), m_bookmarkSyncManager, SLOT(startBookmarkSync()) );

@@ -116,8 +116,10 @@ signals:
     void conflictResolved( MergeItem *item );
 
 private Q_SLOTS:
-     void showSearch();
-     void showConflictDialog( MergeItem *item );
+    void showSearch();
+    // Bookmark sync slots
+    void reloadBookmarks();
+    void showConflictDialog( MergeItem *item );
     
  private:
     /**
