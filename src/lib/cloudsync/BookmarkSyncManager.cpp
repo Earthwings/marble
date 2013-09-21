@@ -41,9 +41,9 @@ public:
     CloudSyncManager *m_cloudSyncManager;
 
     QNetworkAccessManager m_network;
-    QUrl m_uploadEndpoint;
-    QUrl m_downloadEndpoint;
-    QUrl m_timestampEndpoint;
+    QString m_uploadEndpoint;
+    QString m_downloadEndpoint;
+    QString m_timestampEndpoint;
 
     QNetworkReply* m_uploadReply;
     QNetworkReply* m_downloadReply;
@@ -65,9 +65,9 @@ BookmarkSyncManager::Private::Private( CloudSyncManager *cloudSyncManager ) : m_
 {
     m_cachePath = QString( "%0/cloudsync/cache/bookmarks" ).arg( MarbleDirs::localPath() );
     m_localBookmarksPath = QString( "%0/bookmarks/bookmarks.kml" ).arg( MarbleDirs::localPath() );
-    m_downloadEndpoint = QUrl( QString( "%0/%1" ).arg( m_cloudSyncManager->apiUrl().toString() ).arg( "bookmarks/kml" ) );
-    m_uploadEndpoint = QUrl( QString( "%0/%1" ).arg( m_cloudSyncManager->apiUrl().toString() ).arg( "bookmarks/update" ) );
-    m_timestampEndpoint = QUrl( QString( "%0/%1" ).arg( m_cloudSyncManager->apiUrl().toString() ).arg( "bookmarks/timestamp" ) );
+    m_downloadEndpoint = "bookmarks/kml";
+    m_uploadEndpoint = "bookmarks/update";
+    m_timestampEndpoint = "bookmarks/timestamp";
 }
 
 BookmarkSyncManager::Private::~Private()
@@ -90,13 +90,18 @@ void BookmarkSyncManager::startBookmarkSync()
     downloadTimestamp();
 }
 
+QUrl BookmarkSyncManager::endpointUrl( const QString &endpoint )
+{
+    return QUrl( QString( "%0/%1" ).arg( d->m_cloudSyncManager->apiUrl().toString() ).arg( endpoint ) );
+}
+
 void BookmarkSyncManager::uploadBookmarks()
 {
     QByteArray data;
     QByteArray lineBreak = "\r\n";
     QString word = "----MarbleCloudBoundary";
     QString boundary = QString( "--%0" ).arg( word );
-    QNetworkRequest request( d->m_uploadEndpoint );
+    QNetworkRequest request( endpointUrl( d->m_uploadEndpoint ) );
     request.setHeader( QNetworkRequest::ContentTypeHeader, QString( "multipart/form-data; boundary=%0" ).arg( word ) );
 
     data.append( QString( boundary + lineBreak ).toUtf8() );
@@ -124,7 +129,7 @@ void BookmarkSyncManager::uploadBookmarks()
 
 void BookmarkSyncManager::downloadBookmarks()
 {
-    QNetworkRequest request( d->m_downloadEndpoint );
+    QNetworkRequest request( endpointUrl( d->m_downloadEndpoint ) );
     d->m_downloadReply = d->m_network.get( request );
     connect( d->m_downloadReply, SIGNAL(finished()),
              this, SIGNAL(bookmarksDownloaded()) );
@@ -134,7 +139,7 @@ void BookmarkSyncManager::downloadBookmarks()
 
 void BookmarkSyncManager::downloadTimestamp()
 {
-    d->m_timestampReply = d->m_network.get( QNetworkRequest( d->m_timestampEndpoint ) );
+    d->m_timestampReply = d->m_network.get( QNetworkRequest( endpointUrl( d->m_timestampEndpoint ) ) );
     connect( d->m_timestampReply, SIGNAL(finished()),
              this, SLOT(parseTimestamp()) );
 }

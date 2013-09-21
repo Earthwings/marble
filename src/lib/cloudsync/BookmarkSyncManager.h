@@ -57,6 +57,13 @@ public:
 
 private:
     /**
+     * Returns an API endpoint
+     * @param endpoint Endpoint itself without server info
+     * @return Complete API URL as QUrl
+     */
+    QUrl endpointUrl( const QString &endpoint );
+
+    /**
      * Uploads local bookmarks.kml to cloud.
      */
     void uploadBookmarks();
