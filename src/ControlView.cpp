@@ -86,6 +86,7 @@ ControlView::ControlView( QWidget *parent )
     setLayout( layout );
 
     m_conflictDialog = new ConflictDialog( m_marbleWidget );
+    connect( m_marbleWidget->model()->bookmarkManager(), SIGNAL(bookmarksChanged()), this, SLOT(syncBookmarks()) );
 }
 
 ControlView::~ControlView()
@@ -638,9 +639,8 @@ void ControlView::showConflictDialog( MergeItem *item )
 
 void ControlView::syncBookmarks()
 {
-    if( m_bookmarkSyncManager == 0 ) {
-        m_bookmarkSyncManager = new BookmarkSyncManager( m_marbleWidget->model()->cloudSyncManager() );
-    }
+    delete m_bookmarkSyncManager;
+    m_bookmarkSyncManager = new BookmarkSyncManager( m_marbleWidget->model()->cloudSyncManager() );
 
     bool syncEnabled = m_marbleWidget->model()->cloudSyncManager()->isSyncEnabled()
             && m_marbleWidget->model()->cloudSyncManager()->isBookmarkSyncEnabled();

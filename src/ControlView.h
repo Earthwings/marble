@@ -96,7 +96,6 @@ class ControlView : public QWidget
 
     BookmarkSyncManager* bookmarkSyncManager();
 
-    void syncBookmarks();
 
  public slots:
     void printMapScreenShot( QPointer<QPrintDialog> dialog );
@@ -108,6 +107,8 @@ class ControlView : public QWidget
       * Start the configured external map editor (or update it if it is already running)
       */
     void launchExternalMapEditor();
+
+    void syncBookmarks();
 
 signals:
     void showMapWizard();
