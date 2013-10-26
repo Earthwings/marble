@@ -21,6 +21,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QPointer>
+#include <QTimer>
 
 #include "MarbleWidget.h"
 
@@ -145,7 +146,7 @@ private Q_SLOTS:
     CurrentLocationWidget* m_locationWidget;
     BookmarkSyncManager *m_bookmarkSyncManager;
     ConflictDialog *m_conflictDialog;
-    QTimer *m_syncTimer;
+    QTimer m_syncTimer;
 };
 
 }
