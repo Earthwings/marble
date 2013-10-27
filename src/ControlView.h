@@ -21,7 +21,6 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QPointer>
-#include <QTimer>
 
 #include "MarbleWidget.h"
 
@@ -36,7 +35,6 @@ namespace Marble
 {
 
 class CurrentLocationWidget;
-class BookmarkSyncManager;
 class MapThemeManager;
 class ConflictDialog;
 class MarbleModel;
@@ -95,9 +93,6 @@ class ControlView : public QWidget
 
     void setWorkOffline( bool workOffline );
 
-    BookmarkSyncManager* bookmarkSyncManager();
-
-
  public slots:
     void printMapScreenShot( QPointer<QPrintDialog> dialog );
     void printPixmap( QPrinter * printer, const QPixmap& pixmap );
@@ -109,8 +104,6 @@ class ControlView : public QWidget
       */
     void launchExternalMapEditor();
 
-    void syncBookmarks();
-
 signals:
     void showMapWizard();
     void showUploadDialog();
@@ -119,7 +112,6 @@ signals:
 private Q_SLOTS:
     void showSearch();
     // Bookmark sync slots
-    void reloadBookmarks();
     void showConflictDialog( MergeItem *item );
     
  private:
@@ -143,9 +135,7 @@ private Q_SLOTS:
     QString            m_externalEditor;
     QDockWidget       *m_searchDock;
     CurrentLocationWidget* m_locationWidget;
-    BookmarkSyncManager *m_bookmarkSyncManager;
     ConflictDialog *m_conflictDialog;
-    QTimer m_syncTimer;
 };
 
 }
