@@ -39,6 +39,7 @@ class MapThemeManager;
 class ConflictDialog;
 class MarbleModel;
 class MergeItem;
+class CloudSyncManager;
 
 class ControlView : public QWidget
 {
@@ -93,6 +94,8 @@ class ControlView : public QWidget
 
     void setWorkOffline( bool workOffline );
 
+    CloudSyncManager* cloudSyncManager();
+
  public slots:
     void printMapScreenShot( QPointer<QPrintDialog> dialog );
     void printPixmap( QPrinter * printer, const QPixmap& pixmap );
@@ -136,6 +139,7 @@ private Q_SLOTS:
     QDockWidget       *m_searchDock;
     CurrentLocationWidget* m_locationWidget;
     ConflictDialog *m_conflictDialog;
+    CloudSyncManager *m_cloudSyncManager;
 };
 
 }
