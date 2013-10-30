@@ -23,12 +23,22 @@ INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}/cloudsync
  ${QT_INCLUDE_DIR}
 )
-INCLUDE(${QT_USE_FILE})
+
+if( QT4_FOUND )
+  INCLUDE(${QT_USE_FILE})
+else()
+INCLUDE_DIRECTORIES(
+ ${Qt5WebKitWidgets_INCLUDE_DIRS}
+ ${Qt5Xml_INCLUDE_DIRS}
+ ${Qt5Concurrent_INCLUDE_DIRS}
+)
+endif()
+
 INCLUDE(geodata/CMakeLists.txt)
 INCLUDE(graphicsview/CMakeLists.txt)
 INCLUDE(layers/CMakeLists.txt)
 
-set(GENERIC_LIB_VERSION "0.16.20")
+set(GENERIC_LIB_VERSION "0.16.80")
 set(GENERIC_LIB_SOVERSION "17")
 
 if (QTONLY)
@@ -287,15 +297,37 @@ set (marblewidget_UI
 )
 
 # FIXME: cleaner approach of src/lib/MarbleControlBox.* vs. marble.qrc
-qt4_add_resources(marblewidget_SRCS libmarble.qrc ../marble.qrc)
+qt_add_resources(marblewidget_SRCS libmarble.qrc ../marble.qrc)
 
-qt4_wrap_ui(marblewidget_SRCS ${marblewidget_UI})
+qt_wrap_ui(marblewidget_SRCS ${marblewidget_UI})
 marble_qt4_automoc(${marblewidget_SRCS})
 
 
 # link with release version of Qt libs
 ADD_LIBRARY(marblewidget SHARED ${marblewidget_SRCS} ${SOURCES_UI_HDRS})
-TARGET_LINK_LIBRARIES (marblewidget ${QT_QTCORE_LIBRARY} ${QT_QTDBUS_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTXML_LIBRARY} ${QT_QTSVG_LIBRARY} ${QT_QTNETWORK_LIBRARY} ${QT_QTSCRIPT_LIBRARY} ${QT_QTMAIN_LIBRARY} ${QT_QTWEBKIT_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY} )
+if( QT4_FOUND )
+  TARGET_LINK_LIBRARIES (marblewidget 
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTDBUS_LIBRARY}
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTSVG_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTSCRIPT_LIBRARY}
+    ${QT_QTMAIN_LIBRARY}
+    ${QT_QTWEBKIT_LIBRARY}
+    ${QT_QTDECLARATIVE_LIBRARY}
+  )
+else()
+  TARGET_LINK_LIBRARIES (marblewidget
+    ${Qt5Core_LIBRARIES}
+    ${Qt5Xml_LIBRARIES}
+    ${Qt5Widgets_LIBRARIES}
+    ${Qt5WebKitWidgets_LIBRARIES}
+    ${Qt5Svg_LIBRARIES}
+    ${Qt5Script_LIBRARIES}
+    )
+endif()
 
 if (APPLE)
   #defined in top level makefile
@@ -364,6 +396,7 @@ else (APPLE AND QTONLY)
     MapThemeManager.h
     MarbleAboutDialog.h
     MarbleWidgetInputHandler.h
+    MarbleWidgetPopupMenu.h
     TileId.h
     TileCoordsPyramid.h
     TileLevelRangeWidget.h
@@ -372,6 +405,7 @@ else (APPLE AND QTONLY)
     global.h
     MarbleColors.h
     MarbleGlobal.h
+    MarbleDebug.h
     MarbleDirs.h
     GeoPainter.h
     TileCreatorDialog.h
@@ -428,8 +462,10 @@ else (APPLE AND QTONLY)
     routing/RoutingWidget.h
     routing/RoutingManager.h
     TileCreator.h
+    PluginManager.h
     PluginInterface.h
     DialogConfigurationInterface.h
+    PositionProviderPlugin.h
     PositionProviderPluginInterface.h
     RenderPlugin.h
     RenderPluginInterface.h
